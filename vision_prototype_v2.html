@@ -23,15 +23,10 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-const { useState, useMemo } = React;
+const { useState } = React;
 
-// ============================================================================
-// ICONS
-// ============================================================================
 const Icon = ({ path, size = 14, color = 'currentColor' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    {path}
-  </svg>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{path}</svg>
 );
 const icons = {
   Play: <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />,
@@ -64,11 +59,10 @@ const icons = {
   BarChart: <><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>,
   Scale: <><path d="M12 3v18" /><path d="M3 8h18" /><path d="M3 8l4 10h8l-4-10" /><path d="M21 8l-4 10h-8l4-10" /></>,
   Microscope: <><path d="M6 18h12" /><path d="M8 22l8-4" /><path d="M10 9V4a2 2 0 0 1 4 0v5" /><circle cx="12" cy="14" r="4" /></>,
+  Heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />,
+  ClipboardCheck: <><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><polyline points="9 14 11 16 15 12" /></>,
 };
 
-// ============================================================================
-// BRAND TOKENS
-// ============================================================================
 const C = {
   primary: '#0000B7', secondary: '#0073DF', text: '#231F20',
   light: '#E6E6F7', mid: '#4D4DCC', gray: '#F5F5F5', dark: '#1A1A2E',
@@ -77,12 +71,9 @@ const C = {
   warn: '#D97706', warnBg: '#FFFBEB',
   bad: '#DC2626', badBg: '#FEF2F2',
   purple: '#7C3AED', purpleBg: '#FAF5FF',
-  teal: '#0D9488',
+  teal: '#0D9488', pink: '#DB2777',
 };
 
-// ============================================================================
-// CASE DATA
-// ============================================================================
 const CASE = {
   name: 'Martinez v. Apex Freight Logistics',
   type: 'Commercial Motor Vehicle · Wrongful Death',
@@ -91,9 +82,7 @@ const CASE = {
   duration: 1122,
   wordCount: 2847,
   avgWPM: 152,
-  askAmount: '$14.2M',
-  economicPortion: '$5.8M',
-  nonEconomicPortion: '$8.4M',
+  caseTypeKey: 'wrongful_death',
 };
 
 const SEGMENTS = [
@@ -105,273 +94,297 @@ const SEGMENTS = [
   { id: 'ask', label: 'Call to Action', start: 1024, end: 1122, color: '#0000B7' },
 ];
 
-// Synchronized timelines (56 points ~20s each)
 const THEME_TIMELINE = [20,45,72,85,82,78,75,80,82,75,68,55,48,42,38,32,28,25,22,20,18,22,28,35,42,48,55,62,68,72,68,65,60,55,48,42,38,35,40,48,55,62,68,72,75,78,82,85,82,78,72,68,65,70,75,80];
 const ATTENTION_TIMELINE = [65,72,82,88,85,80,78,82,85,80,72,65,58,52,48,52,58,62,55,48,42,38,42,48,55,62,68,72,75,78,72,65,58,52,45,38,32,28,35,42,48,55,62,68,72,75,78,72,65,58,52,48,55,62,70,75];
 const VALENCE_TIMELINE = [50,55,60,35,25,15,20,30,35,25,15,10,5,20,30,40,50,55,60,65,70,60,50,40,30,20,25,35,45,55,40,25,15,10,20,30,40,35,25,30,40,50,60,65,70,75,65,55,45,60,75,85,90,85,80,75];
-// New prosody timelines
 const PITCH_TIMELINE = [55,58,62,55,60,68,72,65,58,55,65,72,68,55,50,58,65,70,65,58,55,62,70,75,68,55,52,60,68,72,65,58,55,65,72,78,70,60,55,62,72,78,82,75,68,62,68,75,82,78,72,65,72,80,85,78];
-const PACE_TIMELINE = [140,148,155,160,152,148,145,155,162,158,145,150,162,170,172,168,160,152,148,155,165,170,162,155,148,152,160,168,172,168,160,152,145,142,148,155,162,170,175,168,160,152,148,155,162,168,165,158,152,148,155,162,170,175,172,168];
 const INTENSITY_TIMELINE = [60,65,72,78,75,70,68,72,78,75,65,60,55,52,58,62,68,70,65,60,55,58,65,70,68,62,58,62,70,75,68,60,55,52,58,65,70,75,72,65,58,55,62,70,78,82,75,68,62,70,80,88,92,88,82,75];
 
 // ============================================================================
-// STORY MODEL (Pennington & Hastie)
+// RULES OF THE ROAD — Now with explicit four-attribute scoring
 // ============================================================================
-const STORY_MODEL = {
-  coverage: {
-    score: 8.2,
-    totalFacts: 47,
-    covered: 39,
-    missed: [
-      { fact: 'The prior citation Apex received for similar HOS violations in 2024', why: 'Ex. 22, p. 14 — not referenced in closing. Strong corroborative evidence left on the table.' },
-      { fact: 'The dispatcher\'s admission that Rodriguez complained of fatigue', why: 'Perez Dep. 143:7-18 — directly supports the "knew or should have known" element.' },
-      { fact: 'Maria\'s text messages to her daughter before the crash', why: 'Humanizing detail that would strengthen the non-economic damages narrative.' },
+const RULES_OF_ROAD = {
+  primaryRule: {
+    statement: 'A trucking company must enforce federal hours-of-service limits to keep fatigued drivers off the road.',
+    statedAt: '02:14',
+    reinforcedTimes: 7,
+    attributes: {
+      simplicity: {
+        score: 9,
+        band: 'strong',
+        finding: 'Plain English, no jargon. A juror with no trucking knowledge can understand it in one hearing.',
+        details: [
+          { label: 'Reading grade level', value: 'Grade 6.4', good: true },
+          { label: 'Jargon density', value: '0.0% in rule statement', good: true },
+          { label: 'Sentence length', value: '14 words', good: true },
+        ],
+        recommendation: 'No change needed. This rule clears the simplicity bar.',
+      },
+      indisputability: {
+        score: 9,
+        band: 'strong',
+        finding: 'The defense cannot credibly dispute this rule — it\'s a federal regulation. Defense expert Rivera conceded it in deposition.',
+        details: [
+          { label: 'Defense witness concession', value: 'Rivera Dep. 84:12-18', good: true },
+          { label: 'Federal regulatory basis', value: '49 CFR § 395', good: true },
+          { label: 'Industry standard alignment', value: 'Universal', good: true },
+        ],
+        recommendation: 'Quote Rivera\'s exact concession in your closing. Right now you reference it but don\'t use his words.',
+      },
+      evidenceConnection: {
+        score: 7,
+        band: 'medium',
+        finding: 'Rule is connected to record evidence, but the connection thins during the rebuttal section.',
+        details: [
+          { label: 'Exhibits tied to rule', value: '4 (Ex. 14, 22, 31, 18)', good: true },
+          { label: 'Deposition citations', value: '2 (Rivera, Perez)', good: true },
+          { label: 'Theme silent stretch', value: '4:15 during rebuttal', good: false },
+        ],
+        recommendation: 'Reinforce the rule at least once between 7:30 and 11:45. The defense will try to reframe in this window.',
+      },
+      verdictImpact: {
+        score: 8,
+        band: 'strong',
+        finding: 'Direct causal link to the crash. If the jury finds this rule was violated, liability follows.',
+        details: [
+          { label: 'Element coverage', value: 'Duty + Breach + Causation', good: true },
+          { label: 'Standalone weight', value: 'Sufficient for verdict', good: true },
+          { label: 'Maps to TX PJC 70.1', value: 'Direct', good: true },
+        ],
+        recommendation: 'Strong as-is. Tie the rule explicitly to the verdict form question 1 in your closing ask.',
+      },
+    },
+    composite: 8.25,
+  },
+  secondaryRules: [
+    { rule: 'A company cannot incentivize drivers to falsify their logs.', composite: 8.0, status: 'strong' },
+    { rule: 'The defendant owed a duty of reasonable care in hiring and supervising its drivers.', composite: 5.75, status: 'weak', issue: 'Uses "duty of reasonable care" — legalese. Overlaps with primary rule. Consider cutting.' },
+  ],
+};
+
+// ============================================================================
+// PREDICTED JUROR EMOTIONAL IMPACT
+// ============================================================================
+const EMOTIONAL_IMPACT = {
+  overall: {
+    primary: 'Empathy',
+    secondary: 'Moral indignation',
+    note: 'Your closing is calibrated to evoke empathy for Maria and moral indignation toward Apex. Both are appropriate for a wrongful death case. The mix shifts effectively across segments — empathy peaks during personal moments, indignation peaks during corporate-conduct moments.',
+  },
+  emotions: [
+    { name: 'Empathy', expected: 'High', range: '60-75%', color: '#7C3AED', icon: 'Heart',
+      strongMoments: [{ time: '08:12', text: 'The crash moment' }, { time: '11:30', text: 'Maria as a person' }],
+      note: 'Strong empathy evocation. Peaks correctly during personal narrative beats. Risk: the 11:30 grief section runs slightly long, which can shift jurors from empathy into discomfort.' },
+    { name: 'Moral indignation', expected: 'High', range: '55-70%', color: '#DC2626', icon: 'AlertTriangle',
+      strongMoments: [{ time: '05:03', text: 'Corporate choice revealed' }, { time: '09:47', text: 'Pattern of violations' }],
+      note: 'Indignation lands on corporate conduct, not driver. This is the right target — Reptile theory and damages research both support directing anger at the institutional actor.' },
+    { name: 'Concern for safety', expected: 'Moderate-High', range: '50-65%', color: '#D97706', icon: 'Shield',
+      strongMoments: [{ time: '02:14', text: 'Safety rule introduction' }, { time: '04:47', text: 'Falsified logs' }],
+      note: 'Safety-rule framing successfully evokes the "this could be me on that highway" feeling — without crossing into Golden Rule territory in most places. The 11:22 passage is the exception (see Objections).' },
+    { name: 'Trust in plaintiff', expected: 'Moderate', range: '45-60%', color: '#16A34A', icon: 'CheckCircle',
+      strongMoments: [{ time: '02:14', text: 'Rule established early' }, { time: '17:50', text: 'Evidence-tied damages' }],
+      note: 'Trust builds steadily through evidence-tethered claims. Erodes briefly at 09:30 (industry-wide overreach) and 11:22 (Golden Rule). One unsupported claim and one objection-risk moment cost the attorney credibility.' },
+    { name: 'Frustration', expected: 'Low-Moderate', range: '15-30%', color: '#0073DF', icon: 'Zap',
+      strongMoments: [{ time: '11:00-13:00', text: 'Cluster of rhetorical questions' }],
+      note: 'The dense cluster of rhetorical questions (9 in this stretch) risks tipping jurors from "being asked" to "being lectured." Frustration is the failure mode here.' },
+    { name: 'Sympathy fatigue', expected: 'Low', range: '10-25%', color: '#6B6B7A', icon: 'AlertTriangle',
+      strongMoments: [{ time: '11:30', text: 'Extended grief section' }],
+      note: 'Watch the duration of the grief beat at 11:30 — jurors process about 90 seconds of pure pathos before saturating. After that, additional emotional appeals reduce rather than increase impact.' },
+  ],
+  byJurorArchetype: [
+    { archetype: 'Rule-Follower', dominantEmotion: 'Concern for safety', intensity: 'High', note: 'The federal-rule framing lands hardest with this juror.' },
+    { archetype: 'Empathetic Connector', dominantEmotion: 'Empathy', intensity: 'Very High', note: 'Maria-as-person beats are calibrated for this juror.' },
+    { archetype: 'Skeptical Analyst', dominantEmotion: 'Trust (conditional)', intensity: 'Moderate', note: 'Trust builds with evidence; threatened by 09:30 overreach.' },
+    { archetype: 'Personal Responsibility', dominantEmotion: 'Indignation (corporate)', intensity: 'Moderate', note: 'Could be high if rebuttal of "individual driver error" were stronger.' },
+    { archetype: 'Institution-Skeptical', dominantEmotion: 'Indignation', intensity: 'Very High', note: 'Already inclined; theme reinforces existing instinct.' },
+  ],
+  insight: 'The closing evokes the right emotions in the right order: safety concern → indignation → empathy → trust → call to action. The risks are dosage — the grief section runs slightly long, the rhetorical questions cluster too densely, and one objection-risk moment fractures trust at exactly the wrong time.',
+};
+
+// Predicted emotion intensity over time (for the timeline viz)
+const EMOTION_TIMELINES = {
+  empathy:    [10,15,20,15,30,55,68,60,55,50,72,82,75,60,45,40,55,65,60,52,48,42,52,68,75,72,68,55,48,52,58,62,68,55,42,38,40,48,55,62,55,52,58,62,72,68,60,55,52,58,62,52,55,60,65,72],
+  indignation:[5,15,30,55,72,82,78,72,68,72,68,52,42,38,52,68,72,75,68,55,42,38,45,55,68,75,72,65,52,48,55,62,72,82,78,68,52,42,38,45,52,58,62,55,52,58,68,75,68,52,55,52,55,52,52,48],
+  safety:     [25,35,55,72,75,68,62,60,68,72,68,55,42,38,32,28,30,40,50,52,48,42,40,48,55,62,68,72,72,72,65,55,48,42,38,32,28,32,40,50,55,52,55,58,62,68,72,68,55,48,55,52,58,62,68,72],
+  trust:      [40,42,48,55,62,68,68,72,75,72,68,60,52,48,42,32,28,25,22,28,32,42,48,55,62,68,72,72,68,65,60,55,52,48,55,60,55,42,38,42,48,55,62,68,72,75,78,72,68,62,68,72,75,72,75,78],
+};
+
+// ============================================================================
+// CASE-TYPE TACTICAL CHECKLISTS
+// ============================================================================
+const CHECKLISTS = {
+  wrongful_death: {
+    label: 'Wrongful Death (TX)',
+    instruction: 'Texas Pattern Jury Charge 70.1',
+    sections: [
+      {
+        title: 'Liability framing',
+        items: [
+          { id: 1, label: 'Theme stated within first 60 seconds', done: true, detail: '02:14 — "chose profit over safety"', source: 'Trial advocacy literature consensus' },
+          { id: 2, label: 'Safety rule framed as community duty (not just plaintiff harm)', done: true, detail: 'Federal HOS rules framed as protecting "everyone on that highway"', source: 'Reptile / Universal Safety Rule' },
+          { id: 3, label: 'Rule attributes met (simple, indisputable, breached, consequential)', done: true, detail: 'Composite 8.25/10 — see Rules of the Road tab', source: 'Friedman & Malone, Rules of the Road' },
+          { id: 4, label: 'Defense witness concessions highlighted', done: true, detail: 'Rivera Dep. 84:12-18 referenced at 07:14', source: 'Rules of the Road — "Witness Hell"' },
+          { id: 5, label: 'Specific exhibit citations for breach', done: true, detail: 'Ex. 22 (ELD), Ex. 31 (emails), Ex. 18 (safety review)', source: 'Argument-evidence tracing' },
+          { id: 6, label: 'Causation chain explicit (not inferred)', done: false, detail: 'Gap at 08:40 — falsified logs → fatigue → crash chain not walked through', source: 'Pennington-Hastie Story Model' },
+        ],
+      },
+      {
+        title: 'Damages framing',
+        items: [
+          { id: 7, label: 'Economic damages tied to expert calculation', done: true, detail: '$5.8M tied to wage records and life-care plan', source: 'Damages anchoring research' },
+          { id: 8, label: 'Non-economic damages anchored (per-diem or unit-based)', done: false, detail: '$8.4M presented as lump sum — research shows per-diem produces higher, defensible awards', source: 'McAuliff & Bornstein (2010)' },
+          { id: 9, label: 'Loss of consortium / companionship explicit', done: true, detail: '15:20 — daughter, husband, parents addressed individually' },
+          { id: 10, label: 'Future losses quantified (not just narrated)', done: 'partial', detail: '30-year life expectancy mentioned but not used as anchor unit' },
+          { id: 11, label: '"Full damages" framed as the only adequate remedy', done: true, detail: '17:30 — frames partial verdict as injustice' },
+        ],
+      },
+      {
+        title: 'Jury charge & verdict form',
+        items: [
+          { id: 12, label: 'PJC 70.1 elements explicitly addressed', done: true, detail: 'All 4 elements — duty, breach, causation, damages' },
+          { id: 13, label: 'Verdict form walked through step-by-step', done: true, detail: '17:50 — guides jury through question 1 → 2 → damages' },
+          { id: 14, label: 'Burden of proof explained (preponderance)', done: 'partial', detail: 'Briefly mentioned at 16:55, no metaphor used. Consider "tilted scale"' },
+        ],
+      },
+      {
+        title: 'Risk avoidance',
+        items: [
+          { id: 15, label: 'No Golden Rule arguments', done: false, detail: '11:22 — "imagine it was your son" flagged as high objection risk' },
+          { id: 16, label: 'No "send a message" / community conscience overreach', done: false, detail: '16:41 — "who\'s next?" flagged as medium risk' },
+          { id: 17, label: 'No facts not in evidence', done: false, detail: '09:30 — "trucking industry" generalization unsupported in record' },
+          { id: 18, label: 'No improper comments on insurance', done: true },
+          { id: 19, label: 'No improper comments on settlement', done: true },
+        ],
+      },
+      {
+        title: 'Plaintiff\'s rebuttal preserved',
+        items: [
+          { id: 20, label: 'Strongest argument held back for rebuttal', done: 'partial', detail: 'Some rebuttal ammunition reserved, but the dispatch emails (Ex. 31) should be saved for rebuttal of "individual driver error" defense' },
+          { id: 21, label: 'Anticipated defense arguments inoculated', done: 'partial', detail: 'Driver-error defense addressed but only 41 seconds — see Defense tab' },
+        ],
+      },
     ],
-    insight: 'Your coverage is strong — 83% of the material evidence is woven into the closing. But three gaps are costly: one weakens your knowledge element on liability, one leaves corroboration unused, one would deepen the damages story.',
   },
-  coherence: {
-    consistency: { score: 9, flags: 0, note: 'No internal contradictions detected. Timeline and actor attributions are internally consistent throughout.' },
-    plausibility: { score: 8, note: 'Story aligns well with common juror schemas about corporate decision-making and commercial trucking.' },
-    completeness: { score: 7, gaps: [
-      { location: '08:40', gap: 'Causal gap — how does "falsified logs" connect to "fatigue caused the crash"? Inferential leap jurors have to make themselves.' },
-      { location: '13:22', gap: 'Motivational gap — why would Apex knowingly pressure drivers? Implied "profit motive" but not established with evidence of specific financial pressure.' },
-    ]},
-    insight: 'Your story is internally sound and plausible. Two inferential gaps force the jury to do your work for them — cognitive load that skeptical jurors will use as a reason to doubt.',
-  },
-  uniqueness: {
-    score: 6,
-    competingStory: 'A tragic accident caused by an individual driver\'s bad judgment on a rainy night — Apex tried to enforce safety rules but can\'t be everywhere at once.',
-    competingStoryStrength: 'medium',
-    insight: 'The defense\'s competing story is coherent enough to create reasonable doubt. Your closing needs to do more to make the "individual driver error" story *not* fit the evidence. Right now, you acknowledge it exists but don\'t dismantle it.',
-  },
-  goodnessOfFit: {
-    score: 8,
-    elementsCovered: 4,
-    totalElements: 4,
-    elements: [
-      { name: 'Duty', covered: true, strength: 'strong', where: '02:14, 04:47' },
-      { name: 'Breach', covered: true, strength: 'strong', where: '05:03, 08:12' },
-      { name: 'Causation', covered: true, strength: 'medium', where: '08:40, 10:55', note: 'Causal chain thin at 08:40 — see completeness gap' },
-      { name: 'Damages', covered: true, strength: 'medium', where: '15:20, 17:50', note: 'Economic well-supported, non-economic under-anchored' },
+  premises_liability: {
+    label: 'Premises Liability (TX)',
+    instruction: 'CACI 1000 series (Notice / Duty)',
+    sections: [
+      {
+        title: 'Notice & duty',
+        items: [
+          { id: 1, label: 'Defendant\'s knowledge of hazard established', done: 'na' },
+          { id: 2, label: 'Reasonable inspection standard explained', done: 'na' },
+          { id: 3, label: 'Building code or industry standard tied to expert testimony', done: 'na' },
+        ],
+      },
+      {
+        title: 'Liability framing',
+        items: [
+          { id: 4, label: 'Theme stated within first 60 seconds', done: 'na' },
+          { id: 5, label: 'Safety rule framed as universal duty', done: 'na' },
+        ],
+      },
     ],
-    insight: 'All four legal elements are addressed. Causation and damages are weaker than duty/breach — and under Texas Pattern Jury Charge 70.1, the jury has to find ALL four to return for plaintiff.',
+    note: 'Switch to a premises liability case to populate this checklist.',
+  },
+  medical_malpractice: {
+    label: 'Medical Malpractice',
+    instruction: 'State pattern instructions on standard of care',
+    sections: [
+      {
+        title: 'Standard of care',
+        items: [
+          { id: 1, label: 'Standard of care articulated as a rule (not subjective judgment)', done: 'na' },
+          { id: 2, label: '"Honest error in judgment" defense rebutted', done: 'na' },
+          { id: 3, label: 'Causation tied to specific medical evidence', done: 'na' },
+        ],
+      },
+    ],
+    note: 'Switch to a medical malpractice case to populate this checklist.',
+  },
+  products_liability: {
+    label: 'Products Liability',
+    instruction: 'Strict liability / design defect / failure to warn',
+    sections: [
+      {
+        title: 'Defect & causation',
+        items: [
+          { id: 1, label: 'Specific defect identified (design, manufacture, or warning)', done: 'na' },
+          { id: 2, label: 'Cost of safer alternative quantified', done: 'na' },
+          { id: 3, label: 'Foreseeability of harm established', done: 'na' },
+        ],
+      },
+    ],
+    note: 'Switch to a products liability case to populate this checklist.',
   },
 };
 
 // ============================================================================
-// LINGUISTIC POWER (O'Barr, Law & Language Project)
+// EXISTING DATA (kept from previous build)
 // ============================================================================
+const STORY_MODEL = {
+  coverage: { score: 8.2, totalFacts: 47, covered: 39, missed: [
+    { fact: 'The prior citation Apex received for similar HOS violations in 2024', why: 'Ex. 22, p. 14 — strong corroborative evidence.' },
+    { fact: 'The dispatcher\'s admission that Rodriguez complained of fatigue', why: 'Perez Dep. 143:7-18 — supports knowledge element.' },
+    { fact: 'Maria\'s text messages to her daughter before the crash', why: 'Humanizing detail.' },
+  ], insight: 'Coverage is strong — 83% of material evidence woven in. Three gaps are costly.' },
+  coherence: {
+    consistency: { score: 9, note: 'No internal contradictions detected.' },
+    plausibility: { score: 8, note: 'Story aligns with juror schemas about corporate decision-making.' },
+    completeness: { score: 7, gaps: [
+      { location: '08:40', gap: 'Causal gap — falsified logs → fatigue → crash chain not walked through.' },
+      { location: '13:22', gap: 'Motivational gap — corporate profit motive implied but not established.' },
+    ]},
+    insight: 'Internally sound. Two inferential gaps force jury to do your work.',
+  },
+  uniqueness: { score: 6, competingStory: 'A tragic accident caused by an individual driver\'s bad judgment on a rainy night.', insight: 'The defense\'s competing story is plausible enough to create doubt.' },
+  goodnessOfFit: { score: 8, elementsCovered: 4, totalElements: 4, elements: [
+    { name: 'Duty', covered: true, strength: 'strong', where: '02:14, 04:47' },
+    { name: 'Breach', covered: true, strength: 'strong', where: '05:03, 08:12' },
+    { name: 'Causation', covered: true, strength: 'medium', where: '08:40, 10:55', note: 'Causal chain thin' },
+    { name: 'Damages', covered: true, strength: 'medium', where: '15:20, 17:50', note: 'Non-economic under-anchored' },
+  ], insight: 'All four elements addressed. Causation and damages weaker than duty/breach.' },
+};
+
 const LINGUISTIC_POWER = {
   overallScore: 7.4,
   markers: {
-    hedges: { count: 8, ratePerMinute: 0.43, examples: ['"sort of the way it happened"', '"I think maybe"', '"kind of a pattern"'], severity: 'low' },
-    hesitations: { count: 23, ratePerMinute: 1.23, examples: ['"um, so"', '"uh, in this case"', '"well…"'], severity: 'low' },
-    intensifiers: { count: 34, ratePerMinute: 1.82, examples: ['"very clear"', '"so important"', '"really matters"'], severity: 'medium' },
-    tagQuestions: { count: 4, ratePerMinute: 0.21, examples: ['"doesn\'t it?"', '"right?"'], severity: 'low' },
+    hedges: { count: 8, ratePerMinute: 0.43, examples: ['"sort of"', '"I think maybe"'], severity: 'low' },
+    hesitations: { count: 23, ratePerMinute: 1.23, examples: ['"um, so"', '"uh"'], severity: 'low' },
+    intensifiers: { count: 34, ratePerMinute: 1.82, examples: ['"very clear"', '"so important"'], severity: 'medium' },
+    tagQuestions: { count: 4, ratePerMinute: 0.21, examples: ['"doesn\'t it?"'], severity: 'low' },
   },
-  activeVoice: 0.78,
-  strongVerbs: 0.14,
-  passiveDrifts: [
-    { time: '06:31-07:12', text: 'Duties were owed. Standards were not met.', note: 'Passive voice removes the defendant from their own conduct.' },
-    { time: '14:08-14:22', text: 'Mistakes were made along the way.', note: 'Classic non-apology phrasing. No actor.' },
-  ],
-  insight: 'Your linguistic power profile is strong. Low hedge and tag-question rates signal certainty. The 34 intensifiers are a yellow flag — at this density, intensifiers start to feel pleading rather than confident. Two passive-voice drifts undermine your own moral architecture.',
 };
 
-// ============================================================================
-// VOCAL / PROSODIC ANALYSIS (Guyer, Vaughan-Johnston, Goupil et al.)
-// ============================================================================
 const PROSODY = {
-  overall: 7.6,
-  certaintySignature: {
-    score: 7,
-    matchRate: 0.68,
-    note: 'Your strongest assertions match the research-validated "certainty prosody" — falling pitch at sentence ends, mid-word intensity peak, appropriate pace — 68% of the time. Target is 80%+.',
-  },
-  risingIntonation: {
-    count: 18,
-    ratePerMinute: 0.96,
-    examples: [
-      { time: '04:22', text: '...this is what they chose to do↗' },
-      { time: '09:17', text: '...the evidence shows a pattern↗' },
-      { time: '13:45', text: '...these are the facts↗' },
-    ],
-    insight: 'You end 18 declarative sentences with rising pitch. Research shows rising intonation signals uncertainty — it turns assertions into questions. Three of your strongest claims land on rising pitch, undercutting them.',
-  },
-  pace: {
-    mean: 152,
-    min: 118,
-    max: 182,
-    variance: 'high',
-    optimal: '140-170 WPM',
-    note: 'You vary pace skillfully — slower at key thematic moments, faster through the liability walkthrough. Peak at 182 WPM during minute 10 is at the edge of comfortable listening speed.',
-  },
-  pitch: {
-    meanHz: 195,
-    range: 'moderate',
-    note: 'Natural inflection. Meaningful pitch variation correlates with emphasis. No monotone stretches longer than 8 seconds.',
-  },
-  intensity: {
-    mean: 68,
-    variance: 'medium',
-    peakAt: '17:50',
-    note: 'Volume builds into your closing ask. Strong pattern. Consider dropping volume (not raising) for your strongest evidence — research shows this draws jurors in.',
-  },
-  pauses: {
-    count: 31,
-    avgLength: 1.4,
-    powerPauses: 3,
-    powerPauseTimes: ['08:16', '11:55', '15:02'],
-    note: '31 pauses averaging 1.4 seconds. Three "power pauses" at 3+ seconds — these are deliberate and they land.',
-  },
-  overconfidenceRisk: {
-    score: 2,
-    note: 'Low. Your delivery sits in the optimal confidence band. The literature warns that over-confidence signals (top-decile speech rate + low pitch variance + no pauses) trigger perception of cockiness. You stay out of that zone.',
-  },
-  contentAlignment: {
-    strongClaims: [
-      { time: '05:03', claim: 'Corporate choice revealed', prosody: 'strong', note: 'Content and delivery align.' },
-      { time: '08:12', claim: 'The crash moment', prosody: 'strong', note: 'Lowest register, 4s pause after — powerful.' },
-      { time: '09:17', claim: 'Evidence shows pattern', prosody: 'weak', note: 'Strong claim, rising pitch — mismatch.' },
-      { time: '13:04', claim: 'Rebuttal of driver error', prosody: 'weak', note: 'Weak content + weak delivery compound.' },
-      { time: '17:50', claim: 'The ask', prosody: 'strong', note: 'Confident delivery, but rushed — 40s for jury to absorb $14.2M.' },
-    ],
-  },
+  certaintySignature: { score: 7, matchRate: 0.68 },
+  risingIntonation: { count: 18, ratePerMinute: 0.96 },
+  pace: { mean: 152, min: 118, max: 182 },
+  pauses: { count: 31, avgLength: 1.4, powerPauses: 3 },
 };
 
-// ============================================================================
-// ARGUMENT STRUCTURE
-// ============================================================================
-const ARGUMENTS = [
-  { claim: 'Apex pressured drivers to exceed legal driving hours', supported: true, evidence: ['Ex. 31 (internal emails)', 'Perez Dep. 112:4', 'Three prior HOS violations in record'], strength: 'strong' },
-  { claim: 'Driver Rodriguez falsified his logs on the day of the crash', supported: true, evidence: ['ELD data, Ex. 22', 'Dispatcher phone records, Ex. 40'], strength: 'strong' },
-  { claim: 'Apex knew of Rodriguez\'s fatigue risk before this route', supported: 'partial', evidence: ['Safety review, Ex. 18'], strength: 'medium', gap: 'The "knew or should have known" element relies on the safety review alone. Defense will argue the review was preliminary and not actionable. Perez Dep. 143:7-18 would strengthen this significantly — but you don\'t cite it.' },
-  { claim: 'Apex\'s conduct caused Maria Martinez\'s death', supported: true, evidence: ['Accident reconstruction, Ex. 11', 'Medical examiner report'], strength: 'strong' },
-  { claim: '$14.2M in damages is reasonable', supported: 'partial', evidence: ['Economic loss calc', 'Pain and suffering narrative'], strength: 'medium', gap: '$8.4M non-economic is a lump sum without per-diem or unit anchoring. Research (McAuliff & Bornstein) shows per-diem framing produces higher, more defensible awards.' },
-  { claim: 'The trucking industry violates federal safety rules generally', supported: false, evidence: [], strength: 'weak', gap: 'At 09:30 you generalize beyond this case. Opens objection ("not in evidence"), dilutes your specific record, reads as overreach.' },
-];
-
-// ============================================================================
-// DAMAGES (Anchoring research: Chapman & Bornstein, Campbell et al., Hans-Reyna)
-// ============================================================================
 const DAMAGES = {
   ask: '$14.2M',
-  specificity: 'high',
-  anchorType: 'lump_sum',
-  magnitudeAssessment: {
-    caseTypeMedian: '$4.8M',
-    caseType90thPct: '$12.1M',
-    yourAnchor: '$14.2M',
-    zone: 'above_90th',
-    note: 'Your anchor is above the 90th percentile for TX commercial motor vehicle wrongful death cases in our reference set. Research shows medium-high anchors (Marti & Wissler) maximize awards. Very high anchors risk credibility backlash.',
-  },
-  perDiem: {
-    used: false,
-    recommendation: '$8.4M non-economic, if framed as ~$767/day over Maria\'s remaining life expectancy (30 yrs), becomes concrete and defensible. Research: McAuliff & Bornstein (2011).',
-  },
-  evidenceTethering: {
-    score: 6,
-    economicLoss: 'well-tethered to wage records and life-care plan',
-    nonEconomicLoss: 'tethered to narrative only, not to concrete units',
-    note: 'The anchor is most persuasive when tied to a factual figure. Your economic portion meets this test; your non-economic portion does not.',
-  },
-  gistFraming: {
-    used: 'partial',
-    note: 'You frame damages as "enormous" and "catastrophic" — good gist language. But you don\'t translate the gist into the number. Hans-Reyna: jurors align qualitative categories (horrible injury) with quantitative categories (large amount). Your numbers and your gist need to click.',
-  },
-  overreachRisk: 'medium',
-  insight: 'Your anchor is in the aggressive band. It will produce a high award if it sticks, but the defense has a plausible opening to attack it as arbitrary. Per-diem framing and tighter evidence-tethering would reduce that risk without lowering the ask.',
+  magnitudeAssessment: { caseTypeMedian: '$4.8M', caseType90thPct: '$12.1M', zone: 'Above 90th percentile' },
 };
 
-// ============================================================================
-// OBJECTION RISK (In Limine)
-// ============================================================================
 const OBJECTIONS = [
-  { time: '11:22', severity: 'high', type: 'Golden Rule', text: '"Imagine it was your son driving home that night."', rule: 'Texas law prohibits asking jurors to place themselves in the plaintiff\'s position. Highly sustainable objection, mistrial-adjacent.', fix: '"This is what happens when a company decides a ten-dollar rule is worth less than a million-dollar risk."' },
-  { time: '16:41', severity: 'medium', type: 'Future harm / community conscience', text: '"Who\'s next?"', rule: 'Implies future harm to jurors; edges into community conscience / "send a message" territory. Increasingly restricted post-reform.', fix: '"They made this choice before. The evidence shows this was not the first time."' },
-  { time: '09:30', severity: 'high', type: 'Not in evidence', text: '"The trucking industry violates federal safety rules generally."', rule: 'Facts not in evidence. Defense will object, judge will sustain, and you lose credibility in front of the jury.', fix: 'Stay on Apex. Specific beats general.' },
-  { time: '14:08', severity: 'low', type: 'Improper argument', text: '"Mistakes were made along the way."', rule: 'Not objectionable per se, but the passive construction weakens your moral argument.', fix: 'Name the actor: "Apex\'s managers made a series of choices."' },
+  { time: '11:22', severity: 'high', type: 'Golden Rule', text: '"Imagine it was your son driving home that night."', rule: 'Asks jurors to place themselves in plaintiff\'s position. Mistrial-adjacent.', fix: '"This is what happens when a company decides a ten-dollar rule is worth less than a million-dollar risk."' },
+  { time: '16:41', severity: 'medium', type: 'Future harm', text: '"Who\'s next?"', rule: 'Implies future harm to jurors.', fix: '"They made this choice before. The evidence shows this was not the first time."' },
+  { time: '09:30', severity: 'high', type: 'Not in evidence', text: '"The trucking industry violates federal safety rules generally."', rule: 'Facts not in evidence.', fix: 'Stay on Apex.' },
 ];
 
-// ============================================================================
-// JURY ATTENTION MODEL (aligned with elaboration-likelihood research)
-// ============================================================================
-const FRICTION = [
-  { time: '03:47', type: 'Jargon drift', severity: 'medium', text: '"Hours of service regulations" used 3x in 90s without explanation.', fix: 'Define once in plain English: "federal rules that limit how many hours a truck driver can be behind the wheel."' },
-  { time: '06:31-07:40', type: 'Abstraction gap', severity: 'medium', text: 'Regulatory discussion with no concrete example. Attention model predicts 32-point drop.', fix: 'Anchor with a specific near-miss from Apex\'s own record (Ex. 18, p. 4).' },
-  { time: '09:30', type: 'Overreach', severity: 'high', text: 'Industry-wide generalization. Objection risk + credibility risk.', fix: 'Stay on Apex.' },
-  { time: '11:22', type: 'Golden Rule', severity: 'high', text: '"Imagine it was your son."', fix: 'See Objections tab.' },
-  { time: '13:04', type: 'Under-rebuttal', severity: 'medium', text: 'Spent 41s on defense\'s strongest argument (individual driver error). Defense will spend 8min.', fix: 'Triple your time. Walk through Ex. 31 (dispatch emails) step by step.' },
-  { time: '16:41', type: 'Future harm frame', severity: 'medium', text: '"Who\'s next?"', fix: 'Past pattern, not future threat.' },
-];
-
-// ============================================================================
-// EMOTIONAL BEATS (from Rekognition face data + content analysis)
-// ============================================================================
-const BEATS = [
-  { time: '02:14', beat: 'Outrage introduced', valence: -35, intensity: 68, delivery: 'Measured — good. Common mistake is leading with full anger.' },
-  { time: '05:03', beat: 'Corporate choice revealed', valence: -40, intensity: 82, delivery: 'Strong. Voice rises, pace slows, eye contact holds.' },
-  { time: '08:12', beat: 'The crash moment', valence: -45, intensity: 88, delivery: 'Lowest vocal register. 4s pause after. Emotional floor of the closing.' },
-  { time: '11:30', beat: 'Grief — Maria as person', valence: -20, intensity: 65, delivery: 'Softer. Well-calibrated. Risk: runs slightly long.' },
-  { time: '15:45', beat: 'Jury as enforcers', valence: 25, intensity: 75, delivery: 'Lift in tone. You step out from the lectern.' },
-  { time: '17:50', beat: 'The ask', valence: 35, intensity: 80, delivery: 'Confident but rushed. 40s between dollar figure and end.' },
-];
-
-// ============================================================================
-// RHETORICAL DEVICES
-// ============================================================================
-const RHETORICAL = [
-  { type: 'Theme repetition', count: 11, quality: 'strong', insight: '"Chose profit over safety" appears 11x. High enough to stick, not rehearsed.' },
-  { type: 'Rule of three', count: 4, quality: 'strong', insight: '"Mother, nurse, daughter" (08:15) is strongest triad.' },
-  { type: 'Contrast pairs', count: 7, quality: 'strong', insight: 'Choice vs accident, safe vs dangerous. Clear moral architecture.' },
-  { type: 'Rhetorical questions', count: 9, quality: 'mixed', insight: '9 is high. Three cluster 11:00-13:00 — jurors stop feeling asked, start feeling lectured.' },
-  { type: 'Callbacks to opening', count: 2, quality: 'weak', insight: 'Only 2 callbacks. Closings multiply power when they close remembered loops.' },
-  { type: 'Sensory detail', count: 6, quality: 'strong', insight: '"Sound of air brakes failing" (08:12) is the most vivid.' },
-  { type: 'Analogies', count: 3, quality: 'mixed', insight: 'Traffic-light works. "Russian roulette" frames defendant as criminal — objection risk.' },
-];
-
-// ============================================================================
-// DELIVERY (visual + acoustic combined)
-// ============================================================================
-const DELIVERY = {
-  // Vocal (research-grounded)
-  pacing: { score: 8, insight: '118–182 WPM range. Skilled variation. Slower at key moments.' },
-  pauses: { score: 7, insight: '31 pauses, 1.4s avg. Three power pauses land.' },
-  intonation: { score: 6, insight: '18 rising declarative endings. Undercuts assertions. Fixable with one week of practice.' },
-  certaintyProsody: { score: 7, insight: '68% match to research-validated certainty signature. Target 80%+.' },
-  // Visual (use with caution — literature warns)
-  eyeContact: { score: 6, insight: 'On notes 41% of time. Aim <20% for a closing.' },
-  gesture: { score: 7, insight: 'Natural, matched to content.' },
-  proxemics: { score: 6, insight: 'Moved once in 18 min. Try 3–4 deliberate shifts aligned to segments.' },
-  articulation: { score: 9, insight: 'Exceptionally clear. No dropped consonants.' },
-  verbalTics: { score: 9, insight: '1.8% filler rate. Occasional "so" at sentence starts.' },
-};
-
-// ============================================================================
-// STEEL-MAN DEFENSE
-// ============================================================================
 const DEFENSE = [
-  { argument: 'The driver made the choice to keep driving. This is individual error, not corporate misconduct.', strength: 'high', willLand: 'High-conscientiousness and personal-responsibility jurors.', yourRebuttal: 'Weak — 41 seconds at 13:04.', suggested: 'Spend 90+ seconds. Walk through Ex. 31 line by line. The driver\'s choice happened inside a system Apex built.' },
-  { argument: 'The economist inflated damages by assuming career-long earnings with promotions that were never guaranteed.', strength: 'high', willLand: 'Skeptical jurors looking to anchor down.', yourRebuttal: 'Not addressed.', suggested: 'Preempt: acknowledge conservative figures. "Even under the defense\'s most conservative assumptions, economic loss alone is $5.8M."' },
-  { argument: 'Moderate rain at night contributed. This is a tragic accident, not a verdict against a company.', strength: 'medium', willLand: 'Jurors seeking to split fault.', yourRebuttal: 'At 11:47 but uses the Golden Rule phrasing.', suggested: 'Use the dash cam (Ex. 8). Weather was not the cause — a fatigued driver who could not react in time was.' },
+  { argument: 'The driver, not Apex, made the decision to keep driving. This is individual error.', strength: 'high' },
+  { argument: 'The economist inflated damages with assumed promotions never guaranteed.', strength: 'high' },
+  { argument: 'Moderate rain at night contributed. This is a tragic accident.', strength: 'medium' },
 ];
 
-// ============================================================================
-// JURY ARCHETYPES (honest framing — concerns/considerations, not predictions)
-// ============================================================================
-const ARCHETYPES = [
-  { name: 'Rule-Follower', description: 'Values precision, documentation, established standards', concern: 'Will fixate on whether Apex\'s conduct crossed a clear bright line. Your "chose profit over safety" theme resonates if tied to specific regulatory violations. Weakens if theme becomes aspirational rather than rule-based.', moment: 'Your strongest moments for this juror: 04:47, 05:03.', risk: 'The industry-wide generalization at 09:30 registers as imprecise.' },
-  { name: 'Empathetic Connector', description: 'Connects emotionally to victim\'s experience', concern: 'Responds to the human story of Maria. Your 08:12 and 11:30 beats are calibrated for this juror.', moment: 'Maria as person (11:30).', risk: 'May feel the damages ask ($14.2M) is disconnected from the grief you\'ve described. Per-diem framing would help.' },
-  { name: 'Skeptical Analyst', description: 'Demands evidence-based reasoning', concern: 'Will test whether every claim rests on evidence in the record. Your argument graph shows two partial claims and one unsupported claim — these are where this juror holds out.', moment: 'Your evidence-tethered claims at 02:14, 05:03, 08:12.', risk: 'The under-supported damages reasoning and the generalization at 09:30 create reasonable doubt for this juror.' },
-  { name: 'Personal Responsibility', description: 'Focuses on individual accountability', concern: 'The defense\'s "individual driver error" argument is aimed directly at this juror. Your 41-second rebuttal is the single biggest gap for this jury archetype.', moment: 'Corporate choice at 05:03.', risk: 'Without a sustained rebuttal of individual error, this juror sides with the defense.' },
-  { name: 'Institution-Skeptical', description: 'Distrusts corporate and institutional actors', concern: 'Already inclined toward plaintiff framing. Your theme lands easily here. Risk is over-confidence — assuming this juror carries the verdict without the others.', moment: 'Theme moments throughout.', risk: 'The "tougher juror" principle: your theme is primarily aimed here. Research suggests you persuade better with a theme aimed at the tougher audience.' },
-];
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
+// ============================================================================
+// COMPONENTS
+// ============================================================================
 function Panel({ title, subtitle, iconKey, children, style = {}, accent }) {
   return (
     <div style={{ background: 'white', border: `1px solid ${C.border}`, borderTop: accent ? `3px solid ${accent}` : `1px solid ${C.border}`, borderRadius: 10, padding: 18, ...style }}>
@@ -447,7 +460,7 @@ function TimelineViz({ data, segments, duration, label, color = C.primary, heigh
   );
 }
 
-function RingMeter({ value, max = 10, label, size = 72, color = C.primary }) {
+function RingMeter({ value, max = 10, label, size = 76, color = C.primary }) {
   const r = size / 2 - 6;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - value / max);
@@ -482,284 +495,454 @@ function Bar({ value, max = 10, color = C.primary, height = 5, label, labelRight
 }
 
 // ============================================================================
-// TAB COMPONENTS
+// NEW TAB: RULES OF THE ROAD
 // ============================================================================
+function RulesTab() {
+  const [expandedAttr, setExpandedAttr] = useState('simplicity');
+  const r = RULES_OF_ROAD.primaryRule;
+  const attrs = ['simplicity', 'indisputability', 'evidenceConnection', 'verdictImpact'];
+  const attrLabels = {
+    simplicity: 'Simplicity',
+    indisputability: 'Indisputability',
+    evidenceConnection: 'Evidence Connection',
+    verdictImpact: 'Verdict Impact',
+  };
+  const attrDesc = {
+    simplicity: 'Can a juror with no expertise understand it on first hearing?',
+    indisputability: 'Can the defense credibly contest it, or must they concede?',
+    evidenceConnection: 'Is the rule tied to specific evidence in the record?',
+    verdictImpact: 'Does its violation directly drive the verdict?',
+  };
 
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="The four attributes a rule must meet" subtitle="Friedman & Malone — Rules of the Road methodology" iconKey="BookOpen">
+          <Insight tone="info">
+            A rule is most powerful when it meets all four attributes: it's <strong>simple</strong> enough for any juror to grasp, <strong>indisputable</strong> by the defense, <strong>connected to evidence</strong> in the record, and important enough that violating it <strong>drives the verdict</strong>. We score each attribute independently and surface where rules fall short.
+          </Insight>
+        </Panel>
+      </div>
+
+      {/* Primary rule card */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Your primary rule" subtitle={`Stated at ${r.statedAt} · Reinforced ${r.reinforcedTimes}× across the closing`} iconKey="Flag" accent={C.primary}>
+          <div style={{ padding: 16, background: C.light, borderRadius: 8, marginBottom: 16 }}>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Rule</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 17, color: C.text, fontStyle: 'italic', lineHeight: 1.5 }}>"{r.statement}"</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+              <RingMeter value={r.composite} label="Composite" size={72} color={C.primary} />
+              <div>
+                <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 13, color: C.text }}>Strong rule overall</div>
+                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>Three attributes are strong. Evidence connection is the weakest pillar — fix it and this rule becomes nearly bulletproof.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* The four attributes */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+            {attrs.map(k => {
+              const a = r.attributes[k];
+              const isExpanded = expandedAttr === k;
+              const color = a.band === 'strong' ? C.good : a.band === 'medium' ? C.warn : C.bad;
+              return (
+                <div key={k} onClick={() => setExpandedAttr(k)} style={{ cursor: 'pointer', padding: 14, background: isExpanded ? C.light : C.gray, borderRadius: 8, borderTop: `3px solid ${color}`, transition: 'background 0.15s' }}>
+                  <RingMeter value={a.score} label={attrLabels[k]} size={72} color={color} />
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 8 }}>{a.band}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Expanded attribute detail */}
+          <div style={{ background: 'white', border: `1px solid ${C.border}`, borderRadius: 8, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div>
+                <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 16, color: C.primary }}>{attrLabels[expandedAttr]}</div>
+                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.subtle, marginTop: 2 }}>{attrDesc[expandedAttr]}</div>
+              </div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 24, color: r.attributes[expandedAttr].band === 'strong' ? C.good : r.attributes[expandedAttr].band === 'medium' ? C.warn : C.bad }}>{r.attributes[expandedAttr].score}/10</div>
+            </div>
+            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, lineHeight: 1.6, marginBottom: 14 }}>{r.attributes[expandedAttr].finding}</div>
+
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Evidence behind the score</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
+              {r.attributes[expandedAttr].details.map((d, i) => (
+                <div key={i} style={{ padding: 10, background: d.good ? C.goodBg : C.warnBg, borderLeft: `3px solid ${d.good ? C.good : C.warn}`, borderRadius: 4 }}>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>{d.label}</div>
+                  <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontWeight: 600 }}>{d.value}</div>
+                </div>
+              ))}
+            </div>
+            <Insight tone={r.attributes[expandedAttr].band === 'strong' ? 'good' : 'warn'}>
+              <strong>Recommendation.</strong> {r.attributes[expandedAttr].recommendation}
+            </Insight>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Secondary rules */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Secondary rules in your closing" subtitle="Each rule is scored against all four attributes" iconKey="Layers">
+          {RULES_OF_ROAD.secondaryRules.map((sr, i) => {
+            const color = sr.status === 'strong' ? C.good : sr.status === 'medium' ? C.warn : C.bad;
+            return (
+              <div key={i} style={{ padding: '12px 0', borderBottom: i < RULES_OF_ROAD.secondaryRules.length - 1 ? `1px solid ${C.border}` : 'none', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, marginTop: 8, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, fontStyle: 'italic', lineHeight: 1.5, marginBottom: 4 }}>"{sr.rule}"</div>
+                  {sr.issue && <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.warn, lineHeight: 1.5 }}>{sr.issue}</div>}
+                </div>
+                <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 14, color, minWidth: 50, textAlign: 'right' }}>{sr.composite}/10</div>
+              </div>
+            );
+          })}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// NEW TAB: EMOTIONAL IMPACT (predicted juror response)
+// ============================================================================
+function EmotionalImpactTab() {
+  const emotionTimelineSegments = SEGMENTS;
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="How the closing is likely to make jurors feel" subtitle="Predicted emotional response — content-based, not face-tracking" iconKey="Heart">
+          <Insight tone="info">
+            <strong>What this measures.</strong> Predicted emotional response in jurors based on the content, framing, and delivery of the closing — not facial recognition of the attorney. Ranges reflect modeling uncertainty, not false precision. Strong claims about jury emotion require validation against mock-jury data, which is part of the data moat work.
+          </Insight>
+        </Panel>
+      </div>
+
+      {/* Top-line summary */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Primary emotional targets" subtitle={`This closing primarily evokes: ${EMOTIONAL_IMPACT.overall.primary} and ${EMOTIONAL_IMPACT.overall.secondary}`} iconKey="Target" accent={C.purple}>
+          <Insight>{EMOTIONAL_IMPACT.overall.note}</Insight>
+        </Panel>
+      </div>
+
+      {/* Stacked emotion timelines */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Emotional intensity over time" subtitle="Predicted intensity of each emotion across the closing" iconKey="TrendingUp">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <TimelineViz data={EMOTION_TIMELINES.empathy} segments={emotionTimelineSegments} duration={CASE.duration} label="Empathy" color={C.purple} yMin={0} yMax={100} />
+            <TimelineViz data={EMOTION_TIMELINES.indignation} segments={emotionTimelineSegments} duration={CASE.duration} label="Moral indignation" color={C.bad} yMin={0} yMax={100} />
+            <TimelineViz data={EMOTION_TIMELINES.safety} segments={emotionTimelineSegments} duration={CASE.duration} label="Concern for safety" color={C.warn} yMin={0} yMax={100} />
+            <TimelineViz data={EMOTION_TIMELINES.trust} segments={emotionTimelineSegments} duration={CASE.duration} label="Trust in plaintiff" color={C.good} yMin={0} yMax={100} />
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <Insight tone="info">
+              <strong>What to see here.</strong> Empathy peaks during the personal narrative beats (08:12, 11:30). Indignation peaks during corporate-conduct beats (05:03, 09:47). Trust climbs steadily but dips at 09:30 (industry overreach) and 11:22 (Golden Rule). Concern for safety builds through the liability story — exactly where it should — but flattens during the rebuttal section, which is when you most need it active.
+            </Insight>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Per-emotion breakdown */}
+      {EMOTIONAL_IMPACT.emotions.map((e, i) => (
+        <div key={i} style={{ gridColumn: 'span 6' }}>
+          <Panel title={e.name} subtitle={`Expected intensity: ${e.expected} · Range: ${e.range}`} iconKey={e.icon} accent={e.color}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <div style={{ width: 56, height: 56, background: e.color + '20', color: e.color, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12 }}>
+                <Icon path={icons[e.icon]} size={26} color={e.color} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <Bar value={parseInt(e.range.split('-')[1])} max={100} color={e.color} height={10} labelRight={e.range} />
+                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 6 }}>Estimated juror intensity</div>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Strong moments</div>
+            {e.strongMoments.map((m, j) => (
+              <div key={j} style={{ padding: 8, background: C.gray, borderRadius: 5, marginBottom: 5, display: 'flex', gap: 10 }}>
+                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: e.color, minWidth: 40 }}>{m.time}</span>
+                <span style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text }}>{m.text}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 10, fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.subtle, lineHeight: 1.5 }}>{e.note}</div>
+          </Panel>
+        </div>
+      ))}
+
+      {/* Per-archetype emotional response */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Predicted dominant emotion by juror archetype" subtitle="Different jurors respond emotionally to different beats" iconKey="Users">
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Noto Sans, sans-serif' }}>
+            <thead>
+              <tr style={{ background: C.gray }}>
+                <th style={{ padding: 10, textAlign: 'left', fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Archetype</th>
+                <th style={{ padding: 10, textAlign: 'left', fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dominant emotion</th>
+                <th style={{ padding: 10, textAlign: 'left', fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Intensity</th>
+                <th style={{ padding: 10, textAlign: 'left', fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              {EMOTIONAL_IMPACT.byJurorArchetype.map((row, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
+                  <td style={{ padding: 12, fontSize: 13, fontWeight: 600 }}>{row.archetype}</td>
+                  <td style={{ padding: 12, fontSize: 13 }}>{row.dominantEmotion}</td>
+                  <td style={{ padding: 12, fontSize: 13 }}>
+                    <span style={{ padding: '2px 8px', background: row.intensity.includes('Very High') ? C.bad + '20' : row.intensity.includes('High') ? C.warn + '20' : C.good + '20', color: row.intensity.includes('Very High') ? C.bad : row.intensity.includes('High') ? C.warn : C.good, borderRadius: 4, fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600 }}>{row.intensity}</span>
+                  </td>
+                  <td style={{ padding: 12, fontSize: 12, color: C.subtle }}>{row.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ marginTop: 14 }}><Insight tone="info">{EMOTIONAL_IMPACT.insight}</Insight></div>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// NEW TAB: TACTICAL CHECKLIST
+// ============================================================================
+function ChecklistTab() {
+  const [activeCaseType, setActiveCaseType] = useState(CASE.caseTypeKey);
+  const checklist = CHECKLISTS[activeCaseType];
+  const total = checklist.sections.reduce((sum, s) => sum + s.items.length, 0);
+  const done = checklist.sections.reduce((sum, s) => sum + s.items.filter(i => i.done === true).length, 0);
+  const partial = checklist.sections.reduce((sum, s) => sum + s.items.filter(i => i.done === 'partial').length, 0);
+  const failed = checklist.sections.reduce((sum, s) => sum + s.items.filter(i => i.done === false).length, 0);
+  const naCount = checklist.sections.reduce((sum, s) => sum + s.items.filter(i => i.done === 'na').length, 0);
+  const applicable = total - naCount;
+
+  const caseTypes = [
+    { key: 'wrongful_death', label: 'Wrongful Death' },
+    { key: 'premises_liability', label: 'Premises Liability' },
+    { key: 'medical_malpractice', label: 'Medical Malpractice' },
+    { key: 'products_liability', label: 'Products Liability' },
+  ];
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title="Tactical closing checklist" subtitle="Case-type-specific elements every closing should hit" iconKey="ClipboardCheck">
+          <Insight tone="info">
+            Each case type has a specific set of legal elements, defense patterns, and risk-avoidance items the closing must address. The checklist auto-populates from your case type and surfaces gaps before trial. Sources include trial advocacy literature, pattern jury charges, and case-type-specific defense playbooks.
+          </Insight>
+          {/* Case type selector */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+            {caseTypes.map(ct => (
+              <button key={ct.key} onClick={() => setActiveCaseType(ct.key)} style={{
+                padding: '8px 14px', background: activeCaseType === ct.key ? C.primary : 'white',
+                color: activeCaseType === ct.key ? 'white' : C.subtle,
+                border: `1px solid ${activeCaseType === ct.key ? C.primary : C.border}`,
+                borderRadius: 6, cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+                fontWeight: 600, fontSize: 12,
+              }}>
+                {ct.label}
+                {ct.key === CASE.caseTypeKey && <span style={{ marginLeft: 6, fontSize: 9, opacity: 0.8, fontWeight: 500 }}>· current case</span>}
+              </button>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      {/* Summary card */}
+      <div style={{ gridColumn: 'span 12' }}>
+        <Panel title={checklist.label} subtitle={`Pattern instruction: ${checklist.instruction}`} iconKey="Scale" accent={C.primary}>
+          {applicable > 0 ? (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 14, alignItems: 'center', marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Completion</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, color: C.primary }}>{done}</span>
+                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: 14, color: C.subtle }}>/ {applicable} complete</span>
+                  </div>
+                  <div style={{ height: 8, background: C.gray, borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+                    <div style={{ width: `${(done / applicable) * 100}%`, height: '100%', background: C.good }} />
+                    <div style={{ width: `${(partial / applicable) * 100}%`, height: '100%', background: C.warn }} />
+                    <div style={{ width: `${(failed / applicable) * 100}%`, height: '100%', background: C.bad }} />
+                  </div>
+                </div>
+                <Stat value={done} label="Done" color={C.good} />
+                <Stat value={partial} label="Partial" color={C.warn} />
+                <Stat value={failed} label="Missing" color={C.bad} />
+              </div>
+              {failed > 0 && <Insight tone="bad"><strong>{failed} items not yet addressed.</strong> Focus areas appear below — they\'re the gap between current closing and a complete one.</Insight>}
+            </>
+          ) : (
+            <Insight tone="info">{checklist.note}</Insight>
+          )}
+        </Panel>
+      </div>
+
+      {/* Sections */}
+      {checklist.sections.map((section, si) => (
+        <div key={si} style={{ gridColumn: 'span 12' }}>
+          <Panel title={section.title} iconKey="ClipboardCheck">
+            {section.items.map((item, i) => {
+              let bg, borderColor, statusIcon, statusColor;
+              if (item.done === true) { bg = C.goodBg; borderColor = C.good; statusIcon = 'CheckCircle'; statusColor = C.good; }
+              else if (item.done === 'partial') { bg = C.warnBg; borderColor = C.warn; statusIcon = 'AlertTriangle'; statusColor = C.warn; }
+              else if (item.done === false) { bg = C.badBg; borderColor = C.bad; statusIcon = 'XCircle'; statusColor = C.bad; }
+              else { bg = C.gray; borderColor = C.border; statusIcon = 'Info'; statusColor = C.subtle; }
+              return (
+                <div key={item.id} style={{ display: 'flex', gap: 12, padding: 12, borderLeft: `3px solid ${borderColor}`, background: bg, borderRadius: 4, marginBottom: 6 }}>
+                  <div style={{ width: 22, height: 22, color: statusColor, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon path={icons[statusIcon]} size={18} color={statusColor} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, fontWeight: 500, lineHeight: 1.45 }}>{item.label}</div>
+                    {item.detail && <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11.5, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>{item.detail}</div>}
+                    {item.source && <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, color: C.subtle, fontStyle: 'italic', marginTop: 4 }}>Source: {item.source}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </Panel>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// EXISTING TABS (condensed versions)
+// ============================================================================
 function DashboardTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Closing on a single timeline" subtitle="All research-backed measurements synchronized to the video" iconKey="Activity">
+        <Panel title="Closing on a single timeline" subtitle="All measurements synchronized" iconKey="Activity">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <TimelineViz data={THEME_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Theme strength" color={C.primary} yMin={0} yMax={100} />
             <TimelineViz data={ATTENTION_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Predicted jury attention" color={C.secondary} yMin={0} yMax={100} />
-            <TimelineViz data={VALENCE_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Emotional valence" color={C.purple} yMin={0} yMax={100} />
+            <TimelineViz data={EMOTION_TIMELINES.empathy} segments={SEGMENTS} duration={CASE.duration} label="Predicted juror empathy" color={C.purple} yMin={0} yMax={100} />
+            <TimelineViz data={EMOTION_TIMELINES.indignation} segments={SEGMENTS} duration={CASE.duration} label="Predicted juror indignation" color={C.bad} yMin={0} yMax={100} />
             <TimelineViz data={PITCH_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Vocal pitch (F0)" color={C.teal} yMin={40} yMax={90} />
-            <TimelineViz data={INTENSITY_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Vocal intensity (loudness)" color={C.warn} yMin={40} yMax={100} />
           </div>
           <div style={{ marginTop: 14 }}>
             <Insight tone="warn">
-              <strong>What to see here.</strong> Theme and attention climb together through minute 7, then both collapse during rebuttal. Emotional valence goes flat exactly where jurors should be leaning in. Vocal intensity builds correctly toward the ask, but pitch patterns show uncertainty at 09:17 and 13:45 — two of your strongest claims delivered with rising intonation that reads as doubt. These lines should rise and fall together.
+              <strong>What to see here.</strong> Theme and attention climb together through minute 7, then collapse during the rebuttal. Empathy peaks correctly at the personal beats; indignation peaks at the corporate-conduct beats. Pitch shows uncertainty at 09:17 and 13:45 — strong claims delivered with rising intonation.
             </Insight>
           </div>
         </Panel>
       </div>
 
       <div style={{ gridColumn: 'span 4' }}>
-        <Panel title="Story Model (Pennington-Hastie)" subtitle="What makes jurors believe a story" iconKey="BookOpen" accent={C.primary}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-            <div style={{ padding: 10, background: C.gray, borderRadius: 6, textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color: C.primary }}>{STORY_MODEL.coverage.score}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: C.subtle, marginTop: 2 }}>Coverage</div>
-            </div>
-            <div style={{ padding: 10, background: C.gray, borderRadius: 6, textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color: C.primary }}>{Math.round((STORY_MODEL.coherence.consistency.score + STORY_MODEL.coherence.plausibility.score + STORY_MODEL.coherence.completeness.score) / 3 * 10) / 10}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: C.subtle, marginTop: 2 }}>Coherence</div>
-            </div>
-            <div style={{ padding: 10, background: C.gray, borderRadius: 6, textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color: C.warn }}>{STORY_MODEL.uniqueness.score}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: C.subtle, marginTop: 2 }}>Uniqueness</div>
-            </div>
-            <div style={{ padding: 10, background: C.gray, borderRadius: 6, textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color: C.primary }}>{STORY_MODEL.goodnessOfFit.score}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: C.subtle, marginTop: 2 }}>Fit to Law</div>
-            </div>
+        <Panel title="Rules of the Road" subtitle="Your primary rule scored on four attributes" iconKey="BookOpen" accent={C.primary}>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <RingMeter value={RULES_OF_ROAD.primaryRule.composite} label="Composite" size={90} color={C.primary} />
           </div>
-          <Insight tone="warn"><strong>Uniqueness is your weak spot.</strong> The defense's competing story is plausible enough to create doubt. See Story tab.</Insight>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 4' }}>
-        <Panel title="Linguistic Power (O'Barr)" subtitle="Hedges, hesitations, intensifiers, tag questions" iconKey="MessageSquare" accent={C.secondary}>
-          <div style={{ marginBottom: 10 }}>
-            <Bar value={LINGUISTIC_POWER.overallScore} max={10} color={C.secondary} height={8} label="Overall power" labelRight={`${LINGUISTIC_POWER.overallScore}/10`} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
-            {Object.entries(LINGUISTIC_POWER.markers).map(([k, v]) => {
-              const color = v.severity === 'low' ? C.good : v.severity === 'medium' ? C.warn : C.bad;
-              const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {Object.entries(RULES_OF_ROAD.primaryRule.attributes).map(([k, v]) => {
+              const color = v.band === 'strong' ? C.good : v.band === 'medium' ? C.warn : C.bad;
+              const label = k === 'evidenceConnection' ? 'Evidence' : k === 'verdictImpact' ? 'Verdict' : k.charAt(0).toUpperCase() + k.slice(1);
               return (
                 <div key={k} style={{ padding: 8, background: C.gray, borderRadius: 5 }}>
-                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
-                    <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 16, color }}>{v.count}</span>
-                    <span style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 10, color: C.subtle }}>{v.ratePerMinute}/min</span>
-                  </div>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 9, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 16, color, marginTop: 2 }}>{v.score}/10</div>
                 </div>
               );
             })}
           </div>
-          <Insight tone="warn">34 intensifiers at 1.8/min is a yellow flag — starts to feel pleading. See Language tab.</Insight>
+          <div style={{ marginTop: 10 }}><Insight tone="warn">Evidence connection (7) is the weakest pillar. Fix in the rebuttal section.</Insight></div>
         </Panel>
       </div>
 
       <div style={{ gridColumn: 'span 4' }}>
-        <Panel title="Vocal Prosody" subtitle="Pitch, pace, intensity, intonation — research-grounded" iconKey="Mic" accent={C.teal}>
-          <div style={{ marginBottom: 10 }}>
-            <Bar value={PROSODY.certaintySignature.matchRate * 10} max={10} color={C.teal} height={8} label="Certainty prosody match" labelRight={`${Math.round(PROSODY.certaintySignature.matchRate * 100)}%`} />
+        <Panel title="Emotional impact" subtitle="What the closing evokes in jurors" iconKey="Heart" accent={C.purple}>
+          {EMOTIONAL_IMPACT.emotions.slice(0, 4).map((e, i) => (
+            <div key={i} style={{ marginBottom: 10 }}>
+              <Bar value={parseInt(e.range.split('-')[1])} max={100} color={e.color} height={6} label={e.name} labelRight={e.range} />
+            </div>
+          ))}
+          <Insight tone="info">Empathy + indignation primary. Trust dips at 09:30 and 11:22.</Insight>
+        </Panel>
+      </div>
+
+      <div style={{ gridColumn: 'span 4' }}>
+        <Panel title="Tactical checklist" subtitle="Wrongful Death (TX) — completion" iconKey="ClipboardCheck" accent={C.secondary}>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <RingMeter value={13} max={21} label="of 21" size={90} color={C.secondary} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
-            <Stat value={PROSODY.pace.mean} label="WPM avg" sublabel="118–182 range" />
-            <Stat value={PROSODY.risingIntonation.count} label="Rising endings" sublabel="signal uncertainty" color={C.warn} />
-            <Stat value={PROSODY.pauses.count} label="Pauses" sublabel={`${PROSODY.pauses.powerPauses} power pauses`} />
-            <Stat value={PROSODY.overconfidenceRisk.score} label="Overconf. risk" sublabel="/10 — low is good" color={C.good} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ padding: 8, background: C.goodBg, borderRadius: 5, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 18, color: C.good }}>13</div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 9, fontWeight: 600, color: C.subtle, textTransform: 'uppercase' }}>Done</div>
+            </div>
+            <div style={{ padding: 8, background: C.warnBg, borderRadius: 5, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 18, color: C.warn }}>3</div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 9, fontWeight: 600, color: C.subtle, textTransform: 'uppercase' }}>Partial</div>
+            </div>
+            <div style={{ padding: 8, background: C.badBg, borderRadius: 5, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 18, color: C.bad }}>5</div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 9, fontWeight: 600, color: C.subtle, textTransform: 'uppercase' }}>Missing</div>
+            </div>
           </div>
-          <Insight tone="info">18 rising declarative endings undercut strong claims. See Voice tab.</Insight>
+          <div style={{ marginTop: 10 }}><Insight tone="bad">3 high-risk gaps: Golden Rule, future harm, facts not in evidence.</Insight></div>
         </Panel>
       </div>
 
       <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Damages Anchoring" subtitle="Ad damnum analysis (Chapman-Bornstein, Hans-Reyna)" iconKey="DollarSign" accent={C.good}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase' }}>Your Ask</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 26, color: C.primary, marginTop: 4 }}>{DAMAGES.ask}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4 }}>{CASE.economicPortion} economic · {CASE.nonEconomicPortion} non-economic</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase' }}>Zone</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 16, color: C.warn, marginTop: 4 }}>Above 90th percentile</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4 }}>Case-type median: {DAMAGES.magnitudeAssessment.caseTypeMedian} · 90th: {DAMAGES.magnitudeAssessment.caseType90thPct}</div>
-            </div>
+        <Panel title="Story Model" subtitle="Pennington-Hastie certainty principles" iconKey="BookOpen" accent={C.primary}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <Stat value={STORY_MODEL.coverage.score} label="Coverage" />
+            <Stat value="8.0" label="Coherence" />
+            <Stat value={STORY_MODEL.uniqueness.score} label="Uniqueness" color={C.warn} />
+            <Stat value={STORY_MODEL.goodnessOfFit.score} label="Fit to law" />
           </div>
-          <div style={{ marginTop: 14 }}>
-            <Insight tone="warn"><strong>Aggressive anchor, missing per-diem.</strong> Research: medium-high anchors maximize awards. $14.2M is at the credibility edge. Per-diem framing for the $8.4M non-economic portion would reduce backlash risk. See Damages tab.</Insight>
-          </div>
+          <div style={{ marginTop: 12 }}><Insight tone="warn"><strong>Uniqueness is your weak spot.</strong> Defense\'s competing story is plausible enough to create doubt.</Insight></div>
         </Panel>
       </div>
 
       <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Objection Risk" subtitle="In limine exposure before trial" iconKey="Shield" accent={C.bad}>
+        <Panel title="Objection risk" subtitle="In limine exposure before trial" iconKey="Shield" accent={C.bad}>
           <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
             <Stat value={OBJECTIONS.filter(o => o.severity === 'high').length} label="High risk" color={C.bad} />
             <Stat value={OBJECTIONS.filter(o => o.severity === 'medium').length} label="Medium" color={C.warn} />
-            <Stat value={OBJECTIONS.filter(o => o.severity === 'low').length} label="Low" color={C.good} />
+            <Stat value="0" label="Low" color={C.good} />
           </div>
-          {OBJECTIONS.filter(o => o.severity === 'high').map((o, i) => (
-            <div key={i} style={{ padding: 10, background: C.badBg, borderLeft: `3px solid ${C.bad}`, borderRadius: 4, marginBottom: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: C.bad }}>{o.time}</span>
-                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: '#7F1D1D', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{o.type}</span>
-              </div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontStyle: 'italic' }}>"{o.text}"</div>
-            </div>
-          ))}
-          <Insight tone="bad">2 high-risk moments. One is mistrial-adjacent. See Objections tab.</Insight>
+          <Insight tone="bad">2 high-risk: Golden Rule (mistrial-adjacent) and "trucking industry" overreach.</Insight>
         </Panel>
       </div>
     </div>
   );
 }
 
+// Condensed versions of remaining tabs (kept brief — the new tabs are the focus)
 function StoryModelTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Does your story meet the four Pennington-Hastie certainty principles?" subtitle="The empirical model of how jurors decide — coverage, coherence, uniqueness, goodness-of-fit" iconKey="BookOpen">
-          <Insight tone="info">
-            <strong>The Story Model (Pennington & Hastie, 1992).</strong> Jurors don't evaluate evidence piece-by-piece — they construct competing narratives and pick the most believable one. Four principles determine whether your story wins. This is the most empirically grounded framework in trial psychology, replicated for 30+ years.
-          </Insight>
+        <Panel title="Pennington-Hastie Story Model" subtitle="Coverage · Coherence · Uniqueness · Goodness-of-Fit" iconKey="BookOpen">
+          <Insight tone="info">Empirical model of juror decision-making (1992, replicated 30+ years). Jurors construct competing narratives and pick the most believable one.</Insight>
         </Panel>
       </div>
-
       <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="1. Coverage" subtitle="Does your story account for all material evidence?" iconKey="Layers">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-            <RingMeter value={STORY_MODEL.coverage.score} label="Score" color={C.primary} size={88} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 24, color: C.text }}>{STORY_MODEL.coverage.covered}<span style={{ fontSize: 16, color: C.subtle }}>/{STORY_MODEL.coverage.totalFacts}</span></div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Material facts covered</div>
-            </div>
-          </div>
-          <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Missed (3)</div>
-          {STORY_MODEL.coverage.missed.map((m, i) => (
-            <div key={i} style={{ padding: 10, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4, marginBottom: 6 }}>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontWeight: 500, marginBottom: 4 }}>{m.fact}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: '#713F12' }}>{m.why}</div>
-            </div>
-          ))}
-          <div style={{ marginTop: 10 }}><Insight tone="warn">{STORY_MODEL.coverage.insight}</Insight></div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="2. Coherence" subtitle="Is your story consistent, plausible, and complete?" iconKey="GitBranch">
-          {['consistency', 'plausibility', 'completeness'].map(k => {
-            const c = STORY_MODEL.coherence[k];
-            const color = c.score >= 8 ? C.good : c.score >= 6 ? C.warn : C.bad;
-            return (
-              <div key={k} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12, color: C.text, textTransform: 'capitalize' }}>{k}</span>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 13, color }}>{c.score}/10</span>
-                </div>
-                <Bar value={c.score} color={color} height={5} />
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4 }}>{c.note}</div>
-              </div>
-            );
-          })}
-          <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 14, marginBottom: 8 }}>Inferential gaps</div>
-          {STORY_MODEL.coherence.completeness.gaps.map((g, i) => (
-            <div key={i} style={{ padding: 10, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4, marginBottom: 6 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: C.warn, marginBottom: 4 }}>{g.location}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text }}>{g.gap}</div>
-            </div>
-          ))}
-          <div style={{ marginTop: 10 }}><Insight tone="warn">{STORY_MODEL.coherence.insight}</Insight></div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="3. Uniqueness" subtitle="Is yours the only coherent story that fits the evidence?" iconKey="Swords">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-            <RingMeter value={STORY_MODEL.uniqueness.score} label="Score" color={C.warn} size={88} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: C.warn, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Weakest pillar</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, marginTop: 4, lineHeight: 1.5 }}>A plausible competing story exists. The jury has an "out."</div>
-            </div>
-          </div>
-          <div style={{ padding: 12, background: '#FEF2F2', borderLeft: `3px solid ${C.bad}`, borderRadius: 4, marginBottom: 10 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color: C.bad, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Defense's competing story</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontStyle: 'italic', lineHeight: 1.5 }}>"{STORY_MODEL.uniqueness.competingStory}"</div>
-          </div>
-          <Insight tone="warn">{STORY_MODEL.uniqueness.insight}</Insight>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="4. Goodness-of-Fit to the Law" subtitle="Does your story map onto what the jury charge requires?" iconKey="Scale">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-            <RingMeter value={STORY_MODEL.goodnessOfFit.score} label="Score" color={C.primary} size={88} />
+        <Panel title="Coverage" iconKey="Layers">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+            <RingMeter value={STORY_MODEL.coverage.score} size={88} />
             <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 24, color: C.text }}>{STORY_MODEL.goodnessOfFit.elementsCovered}/{STORY_MODEL.goodnessOfFit.totalElements}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Elements covered</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 2 }}>TX Pattern Jury Charge 70.1</div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 22 }}>{STORY_MODEL.coverage.covered}/{STORY_MODEL.coverage.totalFacts}</div>
+              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, color: C.subtle, textTransform: 'uppercase' }}>Material facts</div>
             </div>
           </div>
-          {STORY_MODEL.goodnessOfFit.elements.map((e, i) => {
-            const color = e.strength === 'strong' ? C.good : e.strength === 'medium' ? C.warn : C.bad;
-            return (
-              <div key={i} style={{ padding: '10px 0', borderBottom: i < STORY_MODEL.goodnessOfFit.elements.length - 1 ? `1px solid ${C.border}` : 'none', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, marginTop: 6, flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12, color: C.text }}>{e.name}</span>
-                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, color, fontWeight: 600, textTransform: 'uppercase' }}>{e.strength}</span>
-                  </div>
-                  <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle }}>Addressed at {e.where}</div>
-                  {e.note && <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.warn, marginTop: 3 }}>{e.note}</div>}
-                </div>
-              </div>
-            );
-          })}
-          <div style={{ marginTop: 10 }}><Insight tone="warn">{STORY_MODEL.goodnessOfFit.insight}</Insight></div>
+          {STORY_MODEL.coverage.missed.map((m, i) => (
+            <div key={i} style={{ padding: 10, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, marginBottom: 6, borderRadius: 4 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 4 }}>{m.fact}</div>
+              <div style={{ fontSize: 11, color: '#713F12' }}>{m.why}</div>
+            </div>
+          ))}
         </Panel>
       </div>
-    </div>
-  );
-}
-
-function ArgumentTab() {
-  const [expanded, setExpanded] = useState(-1);
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Every claim, every piece of evidence" subtitle="Traced from your closing back to the case record" iconKey="GitBranch">
-          <Insight tone="info">
-            A closing is only as strong as the evidence behind each claim. We trace every assertion you make to the exhibit, deposition, or testimony that supports it — and flag gaps before the defense does.
-          </Insight>
-          <div style={{ marginTop: 14 }}>
-            {ARGUMENTS.map((arg, i) => {
-              const isExp = expanded === i;
-              const color = arg.strength === 'strong' ? C.good : arg.strength === 'medium' ? C.warn : C.bad;
-              return (
-                <div key={i} style={{ borderBottom: i < ARGUMENTS.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                  <div onClick={() => setExpanded(isExp ? -1 : i)} style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, marginTop: 6, flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13.5, color: C.text, fontWeight: 500, lineHeight: 1.5 }}>{arg.claim}</div>
-                      <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, color, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>
-                        {arg.supported === true ? `Supported · ${arg.evidence.length} sources` : arg.supported === 'partial' ? 'Partially supported · gap flagged' : 'Not supported in record'}
-                      </div>
-                    </div>
-                    <Icon path={isExp ? icons.ChevronDown : icons.ChevronRight} size={16} color={C.subtle} />
-                  </div>
-                  {isExp && (
-                    <div style={{ padding: '0 0 14px 22px' }}>
-                      {arg.evidence.length > 0 && (
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Evidence in the record</div>
-                          {arg.evidence.map((e, j) => (
-                            <div key={j} style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, padding: '4px 0' }}>· {e}</div>
-                          ))}
-                        </div>
-                      )}
-                      {arg.gap && <Insight tone="warn"><strong>Gap.</strong> {arg.gap}</Insight>}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+      <div style={{ gridColumn: 'span 6' }}>
+        <Panel title="Uniqueness" iconKey="Swords">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+            <RingMeter value={STORY_MODEL.uniqueness.score} size={88} color={C.warn} />
+            <div style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>A plausible competing story exists. The jury has an "out."</div>
+          </div>
+          <div style={{ padding: 12, background: C.badBg, borderLeft: `3px solid ${C.bad}`, borderRadius: 4 }}>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color: C.bad, textTransform: 'uppercase', marginBottom: 6 }}>Defense\'s competing story</div>
+            <div style={{ fontSize: 12, fontStyle: 'italic' }}>"{STORY_MODEL.uniqueness.competingStory}"</div>
           </div>
         </Panel>
       </div>
@@ -771,59 +954,30 @@ function LanguageTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Powerful vs powerless speech (O'Barr / Law & Language Project)" subtitle="Four linguistic markers separate credible from tentative speech" iconKey="MessageSquare">
-          <Insight tone="info">
-            <strong>Research base.</strong> O'Barr's Law & Language Project (1978) and decades of replication show that four linguistic features — hedges, hesitations, intensifiers, tag questions — systematically reduce perceived credibility, competence, and persuasiveness. Speakers using powerful speech are rated as more believable, more trustworthy, and more intelligent for identical content.
-          </Insight>
+        <Panel title="Powerful vs powerless speech (O\'Barr)" subtitle="Hedges · hesitations · intensifiers · tag questions" iconKey="MessageSquare">
+          <Insight tone="info">Four linguistic features systematically reduce credibility. Speakers using powerful speech are rated as more believable for identical content.</Insight>
         </Panel>
       </div>
-
       {Object.entries(LINGUISTIC_POWER.markers).map(([k, v]) => {
         const color = v.severity === 'low' ? C.good : v.severity === 'medium' ? C.warn : C.bad;
         const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-        const descriptions = {
-          hedges: 'Soften assertions ("sort of," "kind of"). Signal uncertainty about what you\'re saying.',
-          hesitations: 'Fillers ("um," "uh"). Signal that you\'re unsure of the next thought.',
-          intensifiers: 'Amplifiers ("very," "really," "so"). At high density, read as pleading or compensating.',
-          tagQuestions: 'Trailing questions ("...isn\'t it?", "...right?"). Turn assertions into requests for agreement.',
-        };
         return (
           <div key={k} style={{ gridColumn: 'span 6' }}>
-            <Panel title={label} subtitle={descriptions[k]} iconKey="MessageSquare" accent={color}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-                <RingMeter value={v.count} max={50} label="Count" color={color} size={76} />
+            <Panel title={label} iconKey="MessageSquare" accent={color}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <RingMeter value={v.count} max={50} label="Count" color={color} size={72} />
                 <div>
-                  <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color }}>{v.ratePerMinute}<span style={{ fontSize: 13, color: C.subtle }}>/min</span></div>
-                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Rate</div>
-                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{v.severity} concern</div>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 18, color }}>{v.ratePerMinute}/min</div>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color, textTransform: 'uppercase', marginTop: 4 }}>{v.severity} concern</div>
                 </div>
               </div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Examples</div>
-              {v.examples.map((ex, i) => (
-                <div key={i} style={{ padding: '4px 0', fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontStyle: 'italic' }}>{ex}</div>
-              ))}
+              <div style={{ marginTop: 10 }}>
+                {v.examples.map((ex, i) => <div key={i} style={{ fontSize: 12, fontStyle: 'italic', padding: '3px 0' }}>{ex}</div>)}
+              </div>
             </Panel>
           </div>
         );
       })}
-
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Passive voice & structural issues" subtitle="Where your sentences remove the defendant from their own conduct" iconKey="AlertTriangle">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
-            <Stat value={`${Math.round(LINGUISTIC_POWER.activeVoice * 100)}%`} label="Active voice" sublabel="target: >75%" />
-            <Stat value={`${Math.round(LINGUISTIC_POWER.strongVerbs * 100)}%`} label="Strong verbs" sublabel="chose, violated, knew" />
-            <Stat value={LINGUISTIC_POWER.passiveDrifts.length} label="Passive drifts" sublabel="named below" color={C.warn} />
-          </div>
-          {LINGUISTIC_POWER.passiveDrifts.map((p, i) => (
-            <div key={i} style={{ padding: 12, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4, marginBottom: 8 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.warn, marginBottom: 4 }}>{p.time}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, fontStyle: 'italic', marginBottom: 6 }}>"{p.text}"</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#713F12' }}>{p.note}</div>
-            </div>
-          ))}
-          <div style={{ marginTop: 14 }}><Insight>{LINGUISTIC_POWER.insight}</Insight></div>
-        </Panel>
-      </div>
     </div>
   );
 }
@@ -832,94 +986,26 @@ function VoiceTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="The acoustic signature of certainty (Goupil et al., 2021)" subtitle="Research-validated prosodic features that signal confidence and credibility" iconKey="Mic">
-          <Insight tone="info">
-            <strong>Research base.</strong> Listeners across languages perceive confidence and honesty through a single prosodic signature: falling pitch at sentence ends, intensity peak in the middle of words, and moderate-fast speech rate (Goupil et al., Nature Comm 2021). Vocal confidence is curvilinear — too little reads as uncertain; too much reads as cocky (Guyer et al.; Vaughan-Johnston et al.).
-          </Insight>
+        <Panel title="Vocal prosody" subtitle="Goupil et al. certainty signature" iconKey="Mic">
+          <Insight tone="info">Confidence is encoded in pitch, pace, and intensity — measurable directly from audio.</Insight>
         </Panel>
       </div>
-
-      <div style={{ gridColumn: 'span 8' }}>
-        <Panel title="Prosodic timelines" subtitle="Pitch, pace, intensity synced to segments" iconKey="Activity">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <TimelineViz data={PITCH_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Pitch (F0)" color={C.teal} yMin={40} yMax={90} />
-            <TimelineViz data={PACE_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Speech rate (WPM)" color={C.secondary} yMin={100} yMax={200} />
-            <TimelineViz data={INTENSITY_TIMELINE} segments={SEGMENTS} duration={CASE.duration} label="Intensity (loudness)" color={C.warn} yMin={40} yMax={100} />
-          </div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 4' }}>
-        <Panel title="Certainty prosody match" subtitle="Your strongest claims vs the research signature" iconKey="Target">
-          <div style={{ textAlign: 'center', marginBottom: 14 }}>
-            <RingMeter value={PROSODY.certaintySignature.score} label="Overall" color={C.teal} size={110} />
-          </div>
-          <div style={{ textAlign: 'center', marginBottom: 14 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 28, color: C.primary }}>{Math.round(PROSODY.certaintySignature.matchRate * 100)}%</div>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Signature match on strong claims</div>
-          </div>
-          <Insight tone="info">{PROSODY.certaintySignature.note}</Insight>
-        </Panel>
-      </div>
-
       <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Rising intonation flag" subtitle="Declarative sentences ending on rising pitch undercut assertions" iconKey="TrendingUp" accent={C.warn}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 40, color: C.warn, lineHeight: 1 }}>{PROSODY.risingIntonation.count}</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>rising endings</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 2 }}>{PROSODY.risingIntonation.ratePerMinute}/min</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <Insight tone="warn">{PROSODY.risingIntonation.insight}</Insight>
-            </div>
+        <Panel title="Certainty prosody match" iconKey="Target">
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <RingMeter value={PROSODY.certaintySignature.score} size={100} color={C.teal} />
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 22, fontWeight: 700, color: C.primary, marginTop: 8 }}>{Math.round(PROSODY.certaintySignature.matchRate * 100)}%</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>Signature match</div>
           </div>
-          <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Examples where strong claims rose</div>
-          {PROSODY.risingIntonation.examples.map((ex, i) => (
-            <div key={i} style={{ padding: 8, background: C.gray, borderRadius: 5, marginBottom: 5, display: 'flex', gap: 10 }}>
-              <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: C.warn, minWidth: 36 }}>{ex.time}</span>
-              <span style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontStyle: 'italic' }}>"{ex.text}"</span>
-            </div>
-          ))}
         </Panel>
       </div>
-
       <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Content-prosody alignment" subtitle="Does your delivery match the strength of your argument?" iconKey="Layers">
-          {PROSODY.contentAlignment.strongClaims.map((c, i) => {
-            const color = c.prosody === 'strong' ? C.good : C.warn;
-            return (
-              <div key={i} style={{ padding: '10px 0', borderBottom: i < PROSODY.contentAlignment.strongClaims.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: C.primary, minWidth: 42 }}>{c.time}</span>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12, color: C.text, flex: 1 }}>{c.claim}</span>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color, textTransform: 'uppercase' }}>{c.prosody}</span>
-                </div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11.5, color: C.subtle, marginLeft: 52 }}>{c.note}</div>
-              </div>
-            );
-          })}
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Prosodic detail" subtitle="Each dimension measured directly from the audio" iconKey="Volume2">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
-            {[
-              { k: 'pace', label: 'Pace (WPM)', val: `${PROSODY.pace.mean}`, sub: `${PROSODY.pace.min}–${PROSODY.pace.max}`, note: PROSODY.pace.note, color: C.secondary },
-              { k: 'pitch', label: 'Pitch (Hz)', val: `${PROSODY.pitch.meanHz}`, sub: PROSODY.pitch.range + ' range', note: PROSODY.pitch.note, color: C.teal },
-              { k: 'intensity', label: 'Intensity', val: `${PROSODY.intensity.mean}dB`, sub: PROSODY.intensity.variance, note: PROSODY.intensity.note, color: C.warn },
-              { k: 'pauses', label: 'Pauses', val: PROSODY.pauses.count, sub: `${PROSODY.pauses.avgLength}s avg`, note: PROSODY.pauses.note, color: C.primary },
-              { k: 'overconf', label: 'Overconfidence', val: `${PROSODY.overconfidenceRisk.score}/10`, sub: 'lower is safer', note: PROSODY.overconfidenceRisk.note, color: C.good },
-            ].map((m, i) => (
-              <div key={i} style={{ padding: 14, background: C.gray, borderRadius: 8 }}>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>{m.label}</div>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 22, color: m.color, lineHeight: 1 }}>{m.val}</div>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4 }}>{m.sub}</div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.text, marginTop: 8, lineHeight: 1.5 }}>{m.note}</div>
-              </div>
-            ))}
+        <Panel title="Rising intonation flag" iconKey="TrendingUp" accent={C.warn}>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 50, fontWeight: 700, color: C.warn }}>{PROSODY.risingIntonation.count}</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Rising endings</div>
           </div>
+          <Insight tone="warn">Rising pitch on declarative sentences signals uncertainty.</Insight>
         </Panel>
       </div>
     </div>
@@ -930,76 +1016,14 @@ function DamagesTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="The ad damnum ask: is it calibrated?" subtitle="Based on Chapman-Bornstein, Campbell-Chao-Robertson, Hans-Reyna, Marti-Wissler" iconKey="DollarSign">
-          <Insight tone="info">
-            <strong>Research base.</strong> Anchoring is the single most studied effect in jury research. Higher anchors produce higher awards — until they cross a credibility threshold. Medium-high anchors tied to evidence outperform very high or arbitrary anchors. Per-diem framing of non-economic damages produces higher, more defensible awards than lump-sum asks (McAuliff & Bornstein).
-          </Insight>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Where your anchor sits" subtitle="vs. reference distribution for case type + jurisdiction" iconKey="BarChart">
-          <div style={{ position: 'relative', height: 90, marginBottom: 14 }}>
-            <svg width="100%" height="90" viewBox="0 0 400 90">
-              <defs>
-                <linearGradient id="dist" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor={C.good} stopOpacity="0.6" />
-                  <stop offset="50%" stopColor={C.secondary} stopOpacity="0.6" />
-                  <stop offset="85%" stopColor={C.warn} stopOpacity="0.6" />
-                  <stop offset="100%" stopColor={C.bad} stopOpacity="0.6" />
-                </linearGradient>
-              </defs>
-              <path d="M 20,70 Q 60,20 120,25 Q 200,15 260,40 Q 320,65 380,75" fill="url(#dist)" stroke={C.primary} strokeWidth="1.5" />
-              <line x1="130" y1="10" x2="130" y2="80" stroke={C.subtle} strokeDasharray="2,2" strokeWidth="1" />
-              <text x="130" y="9" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="9" fill={C.subtle}>Median $4.8M</text>
-              <line x1="290" y1="10" x2="290" y2="80" stroke={C.warn} strokeDasharray="2,2" strokeWidth="1" />
-              <text x="290" y="9" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="9" fill={C.warn}>90th $12.1M</text>
-              <line x1="340" y1="10" x2="340" y2="80" stroke={C.bad} strokeWidth="2" />
-              <text x="340" y="9" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="10" fontWeight="700" fill={C.bad}>Your ask $14.2M</text>
-            </svg>
+        <Panel title="Damages anchoring" subtitle="Chapman-Bornstein, Hans-Reyna, McAuliff-Bornstein" iconKey="DollarSign">
+          <Insight tone="info">Higher anchors produce higher awards — until they cross a credibility threshold. Per-diem framing for non-economic damages produces higher, defensible awards than lump-sum.</Insight>
+          <div style={{ display: 'flex', gap: 14, marginTop: 14 }}>
+            <Stat value={DAMAGES.ask} label="Your ask" color={C.primary} />
+            <Stat value={DAMAGES.magnitudeAssessment.caseTypeMedian} label="Case median" />
+            <Stat value={DAMAGES.magnitudeAssessment.caseType90thPct} label="90th pct" color={C.warn} />
+            <Stat value={DAMAGES.magnitudeAssessment.zone} label="Zone" color={C.bad} />
           </div>
-          <Insight tone="warn"><strong>{DAMAGES.magnitudeAssessment.zone.replace(/_/g, ' ')}.</strong> {DAMAGES.magnitudeAssessment.note}</Insight>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 6' }}>
-        <Panel title="Per-diem framing opportunity" subtitle="Research shows per-diem produces higher, defensible awards" iconKey="Target">
-          <div style={{ padding: 14, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4, marginBottom: 14 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.warn, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Not currently used</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, lineHeight: 1.55 }}>You present $8.4M non-economic as a lump sum.</div>
-          </div>
-          <div style={{ padding: 14, background: C.goodBg, borderLeft: `3px solid ${C.good}`, borderRadius: 4 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.good, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Recommendation</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, lineHeight: 1.55 }}>{DAMAGES.perDiem.recommendation}</div>
-          </div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Anchoring diagnostic" subtitle="Four research-validated dimensions of a persuasive damages ask" iconKey="Target">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Specificity</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 15, color: C.good }}>High</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>Specific number stated. Research: specific anchors outperform vague asks.</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Evidence tethering</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 15, color: C.warn }}>Mixed</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>Economic portion tied to wage records. Non-economic is narrative-tethered only.</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Gist framing</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 15, color: C.warn }}>Partial</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>"Catastrophic" gist language present. Number and gist don't click.</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Overreach risk</div>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 15, color: C.warn }}>Medium</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 4, lineHeight: 1.5 }}>Above 90th percentile. Credibility backlash possible without tighter anchoring.</div>
-            </div>
-          </div>
-          <div style={{ marginTop: 14 }}><Insight tone="warn">{DAMAGES.insight}</Insight></div>
         </Panel>
       </div>
     </div>
@@ -1010,29 +1034,20 @@ function ObjectionsTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Objection risk audit" subtitle="Phrasing that historically draws sustained objections in TX courts" iconKey="Shield">
-          <Insight tone="info">
-            We flag language that risks in limine motions, sustained objections, or jury instruction to disregard. This includes Golden Rule violations (asking jurors to place themselves in a party's position), community conscience / "send a message" framing, and facts not in evidence. Each flag includes a suggested rewrite that preserves your persuasive intent.
-          </Insight>
+        <Panel title="Objection risk audit" iconKey="Shield">
+          <Insight tone="info">Phrasing that historically draws sustained objections.</Insight>
         </Panel>
       </div>
-
       {OBJECTIONS.map((o, i) => {
-        const colors = o.severity === 'high' ? { bg: C.badBg, border: C.bad, text: '#7F1D1D' } : o.severity === 'medium' ? { bg: C.warnBg, border: C.warn, text: '#713F12' } : { bg: C.goodBg, border: C.good, text: '#14532D' };
+        const colors = o.severity === 'high' ? { bg: C.badBg, border: C.bad } : { bg: C.warnBg, border: C.warn };
         return (
           <div key={i} style={{ gridColumn: 'span 6' }}>
             <Panel title={`${o.type} · ${o.time}`} subtitle={`${o.severity.toUpperCase()} RISK`} iconKey="AlertTriangle" accent={colors.border}>
               <div style={{ padding: 12, background: colors.bg, borderRadius: 6, marginBottom: 12 }}>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 14, color: C.text, fontStyle: 'italic', lineHeight: 1.55 }}>"{o.text}"</div>
+                <div style={{ fontSize: 14, fontStyle: 'italic' }}>"{o.text}"</div>
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>The rule</div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, lineHeight: 1.55 }}>{o.rule}</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Suggested rewrite</div>
-                <div style={{ padding: 10, background: C.light, borderRadius: 4, fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, fontStyle: 'italic', lineHeight: 1.55 }}>"{o.fix}"</div>
-              </div>
+              <div style={{ marginBottom: 12, fontSize: 12, lineHeight: 1.5 }}>{o.rule}</div>
+              <Insight tone="info"><strong>Rewrite:</strong> "{o.fix}"</Insight>
             </Panel>
           </div>
         );
@@ -1045,251 +1060,19 @@ function DefenseTab() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
       <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="The strongest defense against you" subtitle="Steel-manned — not strawmen" iconKey="Swords">
-          <Insight tone="info">
-            We generate the strongest possible version of each defense argument, model how it will land with different jurors, assess how well your current closing rebuts it, and suggest what a stronger rebuttal looks like. If you can defeat these, you can defeat what defense counsel actually delivers.
-          </Insight>
+        <Panel title="Steel-manned defense" iconKey="Swords">
+          <Insight tone="info">The strongest version of each defense argument — not strawmen.</Insight>
         </Panel>
       </div>
-
       {DEFENSE.map((d, i) => (
         <div key={i} style={{ gridColumn: 'span 12' }}>
-          <Panel title={`Defense argument ${i + 1}`} subtitle={`${d.strength.toUpperCase()} STRENGTH`} iconKey="Swords" accent={d.strength === 'high' ? C.bad : C.warn}>
-            <div style={{ padding: 14, background: '#F9FAFB', borderLeft: `3px solid ${C.mid}`, borderRadius: 4, marginBottom: 14 }}>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 14, color: C.text, fontStyle: 'italic', lineHeight: 1.6 }}>"{d.argument}"</div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Who this lands with</div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12.5, color: C.text, lineHeight: 1.55 }}>{d.willLand}</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Your rebuttal now</div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12.5, color: C.text, lineHeight: 1.55 }}>{d.yourRebuttal}</div>
-              </div>
-            </div>
-            <div style={{ padding: 14, background: C.light, borderRadius: 6 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 700, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Suggested response</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, lineHeight: 1.6 }}>{d.suggested}</div>
+          <Panel title={`Defense argument ${i + 1}`} subtitle={d.strength.toUpperCase()} iconKey="Swords" accent={d.strength === 'high' ? C.bad : C.warn}>
+            <div style={{ padding: 12, background: C.gray, borderLeft: `3px solid ${C.mid}`, borderRadius: 4 }}>
+              <div style={{ fontSize: 13, fontStyle: 'italic', lineHeight: 1.6 }}>"{d.argument}"</div>
             </div>
           </Panel>
         </div>
       ))}
-    </div>
-  );
-}
-
-function JuryTab() {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="How different jurors will receive this closing" subtitle="Archetype considerations — not predicted verdicts" iconKey="Users">
-          <Insight tone="info">
-            <strong>A note on honesty.</strong> We don't predict how individual jurors will vote. Instead, we surface likely concerns and resonance points for different jury archetypes, so you can audit whether your closing addresses the tough juror as well as the easy one. Research (James Education Center; mock trial data) consistently shows that themes aimed at the tougher audience outperform themes aimed at sympathetic jurors.
-          </Insight>
-        </Panel>
-      </div>
-
-      {ARCHETYPES.map((a, i) => (
-        <div key={i} style={{ gridColumn: 'span 6' }}>
-          <Panel title={a.name} subtitle={a.description} iconKey="Users">
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>How they'll receive this closing</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12.5, color: C.text, lineHeight: 1.55 }}>{a.concern}</div>
-            </div>
-            <div style={{ padding: 10, background: C.goodBg, borderLeft: `3px solid ${C.good}`, borderRadius: 4, marginBottom: 8 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.good, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Resonant moment</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#14532D' }}>{a.moment}</div>
-            </div>
-            <div style={{ padding: 10, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.warn, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Risk moment</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#713F12' }}>{a.risk}</div>
-            </div>
-          </Panel>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DeliveryTab() {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Delivery — vocal and visual" subtitle="Observable behaviors, not claims about your internal states" iconKey="Eye">
-          <Insight tone="info">
-            <strong>Methodology note.</strong> Vocal dimensions (pacing, intonation, certainty prosody) have strong empirical grounding. Visual dimensions (gesture, proxemics, eye contact) have weaker research support — we report what's observable without claiming it reveals credibility or truthfulness. Meta-analytic research (Bond & DePaulo) shows nonverbal visual lie detection barely exceeds chance.
-          </Insight>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Vocal dimensions (high-confidence measurements)" subtitle="Acoustic analysis of the audio track" iconKey="Mic">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-            {['pacing', 'pauses', 'intonation', 'certaintyProsody'].map(k => {
-              const d = DELIVERY[k];
-              const label = k === 'certaintyProsody' ? 'Certainty prosody' : k.charAt(0).toUpperCase() + k.slice(1);
-              const color = d.score >= 8 ? C.good : d.score >= 6 ? C.secondary : C.warn;
-              return (
-                <div key={k} style={{ padding: 14, background: C.gray, borderRadius: 8, textAlign: 'center' }}>
-                  <RingMeter value={d.score} label={label} color={color} size={76} />
-                  <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 10, lineHeight: 1.5, textAlign: 'left' }}>{d.insight}</div>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Visual dimensions (interpret with caution)" subtitle="Observable behaviors — not inferences about state" iconKey="Eye" accent={C.subtle}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
-            {['eyeContact', 'gesture', 'proxemics', 'articulation', 'verbalTics'].map(k => {
-              const d = DELIVERY[k];
-              const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-              const color = d.score >= 8 ? C.good : d.score >= 6 ? C.secondary : C.warn;
-              return (
-                <div key={k} style={{ padding: 14, background: C.gray, borderRadius: 8, textAlign: 'center' }}>
-                  <RingMeter value={d.score} label={label} color={color} size={72} />
-                  <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 10, lineHeight: 1.5, textAlign: 'left' }}>{d.insight}</div>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 7' }}>
-        <Panel title="Emotional arc" subtitle="Beat-by-beat valence and intensity" iconKey="TrendingUp">
-          <div style={{ position: 'relative', height: 130, marginBottom: 12 }}>
-            <svg width="100%" height="130" viewBox="0 0 600 130" preserveAspectRatio="none">
-              <line x1="0" y1="65" x2="600" y2="65" stroke={C.border} strokeDasharray="3,3" />
-              {BEATS.map((b, i) => {
-                const bTime = parseInt(b.time.split(':')[0]) * 60 + parseInt(b.time.split(':')[1]);
-                const x = (bTime / CASE.duration) * 600;
-                const y = 65 - (b.valence * 1.2);
-                const size = b.intensity / 8;
-                return (
-                  <g key={i}>
-                    <line x1={x} y1="65" x2={x} y2={y} stroke={b.valence < 0 ? C.bad : C.good} strokeWidth="1.5" opacity="0.4" />
-                    <circle cx={x} cy={y} r={size} fill={b.valence < 0 ? C.bad : C.good} opacity="0.7" />
-                    <text x={x} y={y < 65 ? y - 8 : y + 14} textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="8" fontWeight="600" fill={C.subtle}>{b.time}</text>
-                  </g>
-                );
-              })}
-              <text x="4" y="14" fontFamily="Poppins, sans-serif" fontSize="8" fontWeight="600" fill={C.subtle}>POSITIVE</text>
-              <text x="4" y="126" fontFamily="Poppins, sans-serif" fontSize="8" fontWeight="600" fill={C.subtle}>NEGATIVE</text>
-            </svg>
-          </div>
-          {BEATS.map((b, i) => (
-            <div key={i} style={{ padding: '7px 0', borderBottom: i < BEATS.length - 1 ? `1px solid ${C.border}` : 'none', display: 'flex', gap: 10 }}>
-              <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, color: C.primary, minWidth: 36 }}>{b.time}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12, color: C.text }}>{b.beat}</div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, color: C.subtle, marginTop: 2 }}>{b.delivery}</div>
-              </div>
-            </div>
-          ))}
-        </Panel>
-      </div>
-
-      <div style={{ gridColumn: 'span 5' }}>
-        <Panel title="Rhetorical technique" subtitle="Craft elements detected" iconKey="Sparkles">
-          {RHETORICAL.map((d, i) => {
-            const color = d.quality === 'strong' ? C.good : d.quality === 'mixed' ? C.warn : C.bad;
-            return (
-              <div key={i} style={{ padding: '9px 0', borderBottom: i < RHETORICAL.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12, color: C.text }}>{d.type}</span>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 13, color }}>{d.count}×</span>
-                </div>
-                <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11.5, color: C.subtle, lineHeight: 1.45 }}>{d.insight}</div>
-              </div>
-            );
-          })}
-        </Panel>
-      </div>
-    </div>
-  );
-}
-
-function FrictionTab() {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Where the jury loses you" subtitle="Predicted friction points from attention model + content analysis" iconKey="Zap">
-          <Insight tone="info">
-            Six moments where the model predicts jury disengagement, objection risk, or argument vulnerability. Each is ranked by severity and paired with a specific fix.
-          </Insight>
-          <div style={{ marginTop: 14 }}>
-            {FRICTION.map((f, i) => {
-              const color = f.severity === 'high' ? C.bad : f.severity === 'medium' ? C.warn : C.good;
-              return (
-                <div key={i} style={{ padding: '14px 0', borderBottom: i < FRICTION.length - 1 ? `1px solid ${C.border}` : 'none', display: 'flex', gap: 14 }}>
-                  <div style={{ width: 60, flexShrink: 0 }}>
-                    <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 13, color }}>{f.time}</div>
-                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 9, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>{f.severity}</div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{f.type}</div>
-                    <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 13, color: C.text, marginBottom: 6, lineHeight: 1.55 }}>{f.text}</div>
-                    <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.primary, fontStyle: 'italic', lineHeight: 1.55 }}>→ {f.fix}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </div>
-    </div>
-  );
-}
-
-function MethodologyTab() {
-  const references = [
-    { area: 'Story Model', cite: 'Pennington, N., & Hastie, R. (1992). Explaining the evidence: Tests of the story model for juror decision making. Journal of Personality and Social Psychology, 62, 189-206.', used: 'Coverage, coherence, uniqueness, goodness-of-fit scoring in Story tab.' },
-    { area: 'Linguistic Power', cite: 'O\'Barr, W. M. (1982). Linguistic Evidence: Language, Power, and Strategy in the Courtroom. Academic Press.', used: 'Hedges, hesitations, intensifiers, tag questions detection in Language tab.' },
-    { area: 'Powerful Speech', cite: 'Hosman, L. A., & Siltanen, S. A. (2011). Hedges, tag questions, message processing, and persuasion. Journal of Language and Social Psychology, 30, 341-349.', used: 'Severity scoring for linguistic markers.' },
-    { area: 'Vocal Confidence', cite: 'Guyer, J. J., Fabrigar, L. R., & Vaughan-Johnston, T. I. (2019). Speech rate, intonation, and pitch. Personality and Social Psychology Bulletin, 45, 389-405.', used: 'Speech rate and pitch interpretation in Voice tab.' },
-    { area: 'Certainty Prosody', cite: 'Goupil, L., Ponsot, E., Richardson, D., Reyes, G., & Aucouturier, J. J. (2021). Listeners\' perceptions of the certainty and honesty of a speaker are associated with a common prosodic signature. Nature Communications, 12, 861.', used: 'Cross-linguistic certainty prosody match score.' },
-    { area: 'Falling Intonation', cite: 'Vaughan-Johnston, T. I., Guyer, J. J., Fabrigar, L. R., Lamprinakos, G., & Briñol, P. (2024). Falling vocal intonation signals speaker confidence. PSPB.', used: 'Rising intonation flag on declarative sentences.' },
-    { area: 'Damages Anchoring', cite: 'Chapman, G. B., & Bornstein, B. H. (1996). The more you ask for, the more you get: Anchoring in personal injury verdicts. Applied Cognitive Psychology, 10, 519-540.', used: 'Anchor magnitude assessment in Damages tab.' },
-    { area: 'Counter-Anchoring', cite: 'Campbell, J., Chao, B., Robertson, C., & Yokum, D. (2016). Countering the plaintiff\'s anchor. Iowa Law Review, 101, 543.', used: 'Credibility-zone diagnostic.' },
-    { area: 'Per-Diem Damages', cite: 'McAuliff, B. D., & Bornstein, B. H. (2010). All anchors are not equal: The effects of per diem versus lump sum requests on pain and suffering awards. Law and Human Behavior, 34, 164-174.', used: 'Per-diem framing recommendation.' },
-    { area: 'Gist Model', cite: 'Reyna, V. F., Hans, V. P., Corbin, J. C., Yeh, R., Lin, K., & Royer, C. (2015). The gist of juries: Testing a model of damage award decision making. Psychology, Public Policy, and Law, 21, 280-294.', used: 'Gist framing diagnostic.' },
-    { area: 'Organizational Strategy', cite: 'Spiecker, S. C., & Worthington, D. L. (2003). The influence of opening statement/closing argument organizational strategy on juror verdict and damage awards. Law and Human Behavior, 27, 437-456.', used: 'Narrative vs legal-expository detection.' },
-    { area: 'Nonverbal Limits', cite: 'Denault, V. (2020). Justice and nonverbal communication in a post-pandemic world. Journal of Nonverbal Behavior, 44.', used: 'Methodology caveats on visual analysis.' },
-    { area: 'Lie Detection Meta-Analysis', cite: 'Bond, C. F., & DePaulo, B. M. (2006). Accuracy of deception judgments. Personality and Social Psychology Review, 10, 214-234.', used: 'Bounds on credibility claims from visual features.' },
-  ];
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
-      <div style={{ gridColumn: 'span 12' }}>
-        <Panel title="Research foundation" subtitle="What we measure, what we predict, what we don't claim" iconKey="Microscope">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 20 }}>
-            <div style={{ padding: 14, background: C.goodBg, borderLeft: `3px solid ${C.good}`, borderRadius: 4 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 12, color: '#14532D', marginBottom: 8 }}>What is measured</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#14532D', lineHeight: 1.55 }}>Words, pauses, repetition, pitch (F0), intensity, speech rate, gaze direction, gesture frequency, sentence structure, claims traced to evidence in the uploaded case file.</div>
-            </div>
-            <div style={{ padding: 14, background: C.warnBg, borderLeft: `3px solid ${C.warn}`, borderRadius: 4 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 12, color: '#713F12', marginBottom: 8 }}>What is predicted</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#713F12', lineHeight: 1.55 }}>Jury attention and objection risk are modeled from patterns in closings with known outcomes. Research-backed associations, not certainties.</div>
-            </div>
-            <div style={{ padding: 14, background: C.badBg, borderLeft: `3px solid ${C.bad}`, borderRadius: 4 }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 12, color: '#7F1D1D', marginBottom: 8 }}>What is NOT claimed</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: '#7F1D1D', lineHeight: 1.55 }}>We do not infer mental states, jury verdicts, or a witness's truthfulness from video. Lie detection meta-analyses show nonverbal visual inference barely exceeds chance.</div>
-            </div>
-          </div>
-          <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Research citations</div>
-          {references.map((r, i) => (
-            <div key={i} style={{ padding: '12px 0', borderBottom: i < references.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-              <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 700, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{r.area}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12, color: C.text, lineHeight: 1.55, marginBottom: 4 }}>{r.cite}</div>
-              <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11.5, color: C.subtle, fontStyle: 'italic' }}>Used for: {r.used}</div>
-            </div>
-          ))}
-        </Panel>
-      </div>
     </div>
   );
 }
@@ -1304,33 +1087,29 @@ function Dashboard() {
 
   const views = [
     { id: 'dashboard', label: 'Dashboard', iconKey: 'Activity' },
-    { id: 'story', label: 'Story', iconKey: 'BookOpen' },
-    { id: 'argument', label: 'Argument', iconKey: 'GitBranch' },
+    { id: 'rules', label: 'Rules of the Road', iconKey: 'BookOpen' },
+    { id: 'emotional', label: 'Emotional Impact', iconKey: 'Heart' },
+    { id: 'checklist', label: 'Checklist', iconKey: 'ClipboardCheck' },
+    { id: 'story', label: 'Story Model', iconKey: 'Layers' },
     { id: 'language', label: 'Language', iconKey: 'MessageSquare' },
     { id: 'voice', label: 'Voice', iconKey: 'Mic' },
     { id: 'damages', label: 'Damages', iconKey: 'DollarSign' },
     { id: 'objections', label: 'Objections', iconKey: 'Shield' },
     { id: 'defense', label: 'Defense', iconKey: 'Swords' },
-    { id: 'jury', label: 'Jury', iconKey: 'Users' },
-    { id: 'delivery', label: 'Delivery', iconKey: 'Eye' },
-    { id: 'friction', label: 'Friction', iconKey: 'Zap' },
-    { id: 'methodology', label: 'Methodology', iconKey: 'Microscope' },
   ];
 
   const TabContent = ({ active }) => {
     switch (active) {
       case 'dashboard': return <DashboardTab />;
+      case 'rules': return <RulesTab />;
+      case 'emotional': return <EmotionalImpactTab />;
+      case 'checklist': return <ChecklistTab />;
       case 'story': return <StoryModelTab />;
-      case 'argument': return <ArgumentTab />;
       case 'language': return <LanguageTab />;
       case 'voice': return <VoiceTab />;
       case 'damages': return <DamagesTab />;
       case 'objections': return <ObjectionsTab />;
       case 'defense': return <DefenseTab />;
-      case 'jury': return <JuryTab />;
-      case 'delivery': return <DeliveryTab />;
-      case 'friction': return <FrictionTab />;
-      case 'methodology': return <MethodologyTab />;
       default: return <DashboardTab />;
     }
   };
@@ -1360,31 +1139,31 @@ function Dashboard() {
         <div style={{ position: 'absolute', right: -40, top: -60, opacity: 0.06 }}>
           <svg width="280" height="280" viewBox="0 0 100 100"><polygon points="25,5 75,5 100,50 75,95 25,95 0,50" fill="white" /></svg>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 1fr 1fr 1fr', gap: 24, alignItems: 'center', position: 'relative' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr', gap: 24, alignItems: 'center', position: 'relative' }}>
           <div>
             <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 6 }}>The Headline</div>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 19, fontWeight: 700, lineHeight: 1.3 }}>Your theme lands. Your rebuttal doesn't. Your prosody undercuts your strongest claims.</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12.5, opacity: 0.85, marginTop: 6, lineHeight: 1.55 }}>Strong safety-rule framing buys 11 minutes of attention. Then the rebuttal goes silent. Three high-risk moments raise credibility and objection concerns. The fixes are specific and low-effort.</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 19, fontWeight: 700, lineHeight: 1.3 }}>Strong rule, right emotions, missing checklist items.</div>
+            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 12.5, opacity: 0.85, marginTop: 6, lineHeight: 1.55 }}>Your primary safety rule scores 8.25/10 across the four attributes. Empathy and indignation hit the right beats. But 5 wrongful-death checklist items are missing or partial — including 2 high-risk objection moments.</div>
           </div>
           <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 20 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Overall</div>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>7.4<span style={{ fontSize: 14, opacity: 0.6 }}>/10</span></div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>top 32% in set</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Rule Score</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>8.25<span style={{ fontSize: 14, opacity: 0.6 }}>/10</span></div>
+            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>composite (4 attrs)</div>
           </div>
           <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 20 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Story Model</div>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>7.3</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>uniqueness weak</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Primary Emotion</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 22, lineHeight: 1.1 }}>Empathy</div>
+            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>60-75% intensity</div>
+          </div>
+          <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 20 }}>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Checklist</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>13<span style={{ fontSize: 14, opacity: 0.6 }}>/21</span></div>
+            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>5 missing</div>
           </div>
           <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 20 }}>
             <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>Objection Risk</div>
             <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 30, lineHeight: 1 }}>2</div>
             <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>high-risk moments</div>
-          </div>
-          <div style={{ borderLeft: '1px solid rgba(255,255,255,0.2)', paddingLeft: 20 }}>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 4 }}>#1 Fix</div>
-            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 15, lineHeight: 1.25 }}>Rewrite Golden Rule at 11:22</div>
-            <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11, opacity: 0.75, marginTop: 2 }}>low effort, high impact</div>
           </div>
         </div>
       </div>
@@ -1408,7 +1187,7 @@ function Dashboard() {
           <TabContent active={activeView} />
         </div>
 
-        {/* Right column: Video + meta */}
+        {/* Right column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ background: 'white', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', position: 'sticky', top: 116 }}>
             <div style={{ aspectRatio: '16/9', background: `linear-gradient(135deg, ${C.primary} 0%, ${C.secondary} 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1441,20 +1220,17 @@ function Dashboard() {
 
           <Panel title="Top 3 fixes" subtitle="Ranked by expected lift" iconKey="Lightbulb">
             {[
-              { num: 1, title: 'Rewrite Golden Rule at 11:22', effort: 'Low', impact: 'High', note: 'Mistrial risk → zero. Single sentence.' },
-              { num: 2, title: 'Triple rebuttal time on individual driver error', effort: 'Med', impact: 'High', note: '41s → 90s+. This is where verdicts get lost.' },
-              { num: 3, title: 'Add per-diem for $8.4M non-economic', effort: 'Med', impact: 'Med', note: '$767/day over 30 years is concrete, defensible.' },
+              { num: 1, title: 'Rewrite Golden Rule at 11:22', effort: 'Low', impact: 'High' },
+              { num: 2, title: 'Strengthen rule\'s evidence connection in rebuttal', effort: 'Med', impact: 'High' },
+              { num: 3, title: 'Add per-diem for $8.4M non-economic', effort: 'Med', impact: 'Med' },
             ].map((fix, i) => (
-              <div key={i} style={{ padding: '10px 0', borderBottom: i < 2 ? `1px solid ${C.border}` : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, flexShrink: 0 }}>{fix.num}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12.5, color: C.text, lineHeight: 1.35 }}>{fix.title}</div>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 4, fontFamily: 'Poppins, sans-serif', fontSize: 10, color: C.subtle }}>
-                      <span>Effort: <strong style={{ color: C.text }}>{fix.effort}</strong></span>
-                      <span>Impact: <strong style={{ color: fix.impact === 'High' ? C.good : C.warn }}>{fix.impact}</strong></span>
-                    </div>
-                    <div style={{ fontFamily: 'Noto Sans, sans-serif', fontSize: 11.5, color: C.subtle, marginTop: 5, lineHeight: 1.5 }}>{fix.note}</div>
+              <div key={i} style={{ padding: '10px 0', borderBottom: i < 2 ? `1px solid ${C.border}` : 'none', display: 'flex', gap: 10 }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 11, flexShrink: 0 }}>{fix.num}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 12.5, color: C.text, lineHeight: 1.35 }}>{fix.title}</div>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 4, fontFamily: 'Poppins, sans-serif', fontSize: 10, color: C.subtle }}>
+                    <span>Effort: <strong style={{ color: C.text }}>{fix.effort}</strong></span>
+                    <span>Impact: <strong style={{ color: fix.impact === 'High' ? C.good : C.warn }}>{fix.impact}</strong></span>
                   </div>
                 </div>
               </div>
@@ -1463,12 +1239,12 @@ function Dashboard() {
 
           <Panel title="Case context" iconKey="FileText">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily: 'Noto Sans, sans-serif', fontSize: 12 }}>
-              <div><span style={{ color: C.subtle }}>Attorney: </span><strong style={{ color: C.text }}>{CASE.attorney}</strong></div>
-              <div><span style={{ color: C.subtle }}>Jurisdiction: </span><strong style={{ color: C.text }}>{CASE.jurisdiction}</strong></div>
-              <div><span style={{ color: C.subtle }}>Words: </span><strong style={{ color: C.text }}>{CASE.wordCount.toLocaleString()}</strong> <span style={{ color: C.subtle, fontSize: 11 }}>· {CASE.avgWPM} WPM</span></div>
-              <div><span style={{ color: C.subtle }}>Exhibits referenced: </span><strong style={{ color: C.text }}>14</strong></div>
-              <div><span style={{ color: C.subtle }}>Depositions cited: </span><strong style={{ color: C.text }}>6</strong></div>
-              <div><span style={{ color: C.subtle }}>Record coverage: </span><strong style={{ color: C.good }}>92%</strong></div>
+              <div><span style={{ color: C.subtle }}>Attorney: </span><strong>{CASE.attorney}</strong></div>
+              <div><span style={{ color: C.subtle }}>Jurisdiction: </span><strong>{CASE.jurisdiction}</strong></div>
+              <div><span style={{ color: C.subtle }}>Case type: </span><strong>{CHECKLISTS[CASE.caseTypeKey].label}</strong></div>
+              <div><span style={{ color: C.subtle }}>Pattern instruction: </span><strong>{CHECKLISTS[CASE.caseTypeKey].instruction}</strong></div>
+              <div><span style={{ color: C.subtle }}>Words: </span><strong>{CASE.wordCount.toLocaleString()}</strong></div>
+              <div><span style={{ color: C.subtle }}>Exhibits referenced: </span><strong>14</strong></div>
             </div>
           </Panel>
         </div>
